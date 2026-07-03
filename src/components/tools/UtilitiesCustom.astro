@@ -1,0 +1,478 @@
+---
+import { Play, Copy, RefreshCw, FileText, Clipboard, Printer, Plus, Trash2 } from '@lucide/astro';
+
+interface Props {
+  id: string;
+}
+
+const { id } = Astro.props;
+---
+
+<div class="glass-card p-6 rounded-3xl relative">
+  <!-- Typing Speed Test -->
+  {id === 'typing-speed-test' && (
+    <div class="space-y-6 max-w-2xl mx-auto">
+      <div class="text-center">
+        <h3 class="text-sm font-bold uppercase tracking-wider text-primary">Typing Speed Tester</h3>
+        <p class="text-xs text-text-muted mt-1">Test your words-per-minute (WPM) speed and accuracy.</p>
+      </div>
+
+      <!-- Test Sentence Panel -->
+      <div id="typing-prompt" class="p-4 rounded-xl border border-border-card bg-bg-main/30 font-mono text-sm leading-relaxed text-text-muted select-none">
+        The quick brown fox jumps over the lazy dog. Programming is the art of algorithm design and client side execution inside sandboxed environments.
+      </div>
+
+      <!-- Typing Input -->
+      <textarea 
+        id="typing-input-area" 
+        rows="4" 
+        placeholder="Start typing the prompt sentence here to begin the speed test..."
+        class="w-full p-4 rounded-xl border border-border-card bg-bg-main/50 text-xs font-mono text-text-main focus:outline-none focus:border-primary/50"
+      ></textarea>
+
+      <!-- Realtime stats -->
+      <div class="grid grid-cols-3 gap-4 text-center">
+        <div class="p-3 bg-bg-card border border-border-card rounded-xl">
+          <div class="text-2xl font-extrabold text-primary" id="typing-wpm">0</div>
+          <div class="text-[10px] uppercase font-bold text-text-muted mt-1">WPM</div>
+        </div>
+        <div class="p-3 bg-bg-card border border-border-card rounded-xl">
+          <div class="text-2xl font-extrabold text-accent" id="typing-accuracy">100%</div>
+          <div class="text-[10px] uppercase font-bold text-text-muted mt-1">Accuracy</div>
+        </div>
+        <div class="p-3 bg-bg-card border border-border-card rounded-xl">
+          <div class="text-2xl font-extrabold text-text-main" id="typing-timer">0s</div>
+          <div class="text-[10px] uppercase font-bold text-text-muted mt-1">Time Elapsed</div>
+        </div>
+      </div>
+
+      <div class="text-center">
+        <button id="typing-reset-btn" class="tool-btn tool-btn-secondary py-1.5 px-4 text-xs flex items-center gap-1 mx-auto">
+          <RefreshCw class="h-3.5 w-3.5" /> Restart Test
+        </button>
+      </div>
+    </div>
+  )}
+
+  <!-- Offline Notepad -->
+  {id === 'notes' && (
+    <div class="space-y-4">
+      <div class="flex items-center justify-between border-b border-border-card pb-2">
+        <h3 class="text-sm font-bold uppercase tracking-wider text-text-main">Persistent Notepad</h3>
+        <span class="text-[10px] text-text-muted bg-primary/10 text-primary px-2 py-0.5 rounded font-medium">Auto-saves to browser storage</span>
+      </div>
+      <textarea 
+        id="notepad-textarea" 
+        rows="12" 
+        placeholder="Type your developer scratchpad notes here. They are automatically saved and will persist even if you reload or close the browser tab..."
+        class="w-full p-4 rounded-xl border border-border-card bg-bg-main/30 text-xs text-text-main focus:outline-none focus:border-primary/50"
+      ></textarea>
+      <div class="flex justify-between items-center text-xs text-text-muted">
+        <div class="flex gap-4">
+          <span>Words: <strong id="notepad-word-count" class="text-text-main">0</strong></span>
+          <span>Chars: <strong id="notepad-char-count" class="text-text-main">0</strong></span>
+        </div>
+        <button id="notepad-clear-btn" class="tool-btn tool-btn-secondary py-1 px-3 text-[10px] flex items-center gap-1">
+          <Trash2 class="h-3 w-3" /> Clear Notepad
+        </button>
+      </div>
+    </div>
+  )}
+
+  <!-- Clipboard Inspector -->
+  {id === 'clipboard' && (
+    <div class="space-y-4">
+      <h3 class="text-sm font-bold uppercase tracking-wider text-text-main border-b border-border-card pb-2">Clipboard Inspector</h3>
+      <p class="text-xs text-text-muted">Extract and clean up styling or characters from your clipboard contents.</p>
+      
+      <div class="flex gap-3">
+        <button id="clip-paste-btn" class="tool-btn tool-btn-primary py-2 px-4 text-xs flex items-center gap-1.5">
+          <Clipboard class="h-4 w-4" /> Paste & Inspect
+        </button>
+        <button id="clip-clean-btn" class="tool-btn tool-btn-secondary py-2 px-4 text-xs flex items-center gap-1">
+          Clean / Clear
+        </button>
+      </div>
+
+      <div>
+        <label class="tool-label text-xs">Raw Clipboard Text Content</label>
+        <textarea id="clip-textarea" readonly rows="8" placeholder="Click 'Paste & Inspect' to read browser clipboard contents..." class="w-full p-4 rounded-xl border border-border-card bg-bg-main/30 text-xs font-mono focus:outline-none"></textarea>
+      </div>
+    </div>
+  )}
+
+  <!-- Invoice Creator -->
+  {id === 'invoice-generator' && (
+    <div class="space-y-6">
+      <div class="flex justify-between items-center border-b border-border-card pb-2">
+        <h3 class="text-sm font-bold uppercase tracking-wider text-text-main">Invoice Builder</h3>
+        <button id="invoice-print-btn" class="tool-btn tool-btn-primary py-1.5 px-4 text-xs flex items-center gap-1.5">
+          <Printer class="h-3.5 w-3.5" /> Print / Save PDF
+        </button>
+      </div>
+
+      <!-- Form Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="space-y-3">
+          <h4 class="text-xs font-bold text-primary">Seller Information</h4>
+          <input type="text" id="inv-seller-name" placeholder="Company / Your Name" class="w-full p-2.5 rounded-lg border border-border-card bg-bg-main/20 text-xs" />
+          <input type="text" id="inv-seller-address" placeholder="Address, Email" class="w-full p-2.5 rounded-lg border border-border-card bg-bg-main/20 text-xs" />
+        </div>
+        <div class="space-y-3">
+          <h4 class="text-xs font-bold text-accent">Client Information</h4>
+          <input type="text" id="inv-client-name" placeholder="Client Company / Name" class="w-full p-2.5 rounded-lg border border-border-card bg-bg-main/20 text-xs" />
+          <input type="text" id="inv-client-address" placeholder="Billing Address" class="w-full p-2.5 rounded-lg border border-border-card bg-bg-main/20 text-xs" />
+        </div>
+      </div>
+
+      <!-- Items editor -->
+      <div class="space-y-3 border-t border-border-card pt-4">
+        <div class="flex justify-between items-center">
+          <h4 class="text-xs font-bold text-text-main">Line Items</h4>
+          <button id="invoice-add-item" class="tool-btn tool-btn-secondary py-1 px-3 text-[10px] flex items-center gap-1"><Plus class="h-3 w-3" /> Add Row</button>
+        </div>
+        
+        <div id="invoice-items-rows" class="space-y-2">
+          <div class="flex gap-2 inv-item-row">
+            <input type="text" placeholder="Item Description" class="flex-grow p-2 rounded border border-border-card bg-bg-main/20 text-xs" value="Software Engineering Consultation" />
+            <input type="number" placeholder="Qty" class="w-16 p-2 rounded border border-border-card bg-bg-main/20 text-xs text-center" value="10" />
+            <input type="number" placeholder="Rate" class="w-24 p-2 rounded border border-border-card bg-bg-main/20 text-xs text-right" value="150" />
+            <button class="remove-inv-item text-text-muted hover:text-rose-400 p-2"><Trash2 class="h-3.5 w-3.5" /></button>
+          </div>
+        </div>
+
+        <div class="text-right text-xs font-bold text-text-main border-t border-border-card pt-3">
+          Total Amount: <span id="invoice-total" class="text-primary text-sm">$1,500.00</span>
+        </div>
+      </div>
+    </div>
+  )}
+
+  <!-- Resume Builder -->
+  {id === 'resume-builder' && (
+    <div class="space-y-6">
+      <div class="flex justify-between items-center border-b border-border-card pb-2">
+        <h3 class="text-sm font-bold uppercase tracking-wider text-text-main">Resume & CV Builder</h3>
+        <button id="resume-print-btn" class="tool-btn tool-btn-primary py-1.5 px-4 text-xs flex items-center gap-1.5">
+          <Printer class="h-3.5 w-3.5" /> Print / Save CV
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <!-- Personal Details -->
+        <div>
+          <h4 class="text-xs font-bold text-primary mb-2">Personal Details</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <input type="text" id="cv-name" placeholder="Your Full Name" class="p-2.5 rounded-lg border border-border-card bg-bg-main/20 text-xs" value="Jane Doe" />
+            <input type="text" id="cv-title" placeholder="Job Title / Role" class="p-2.5 rounded-lg border border-border-card bg-bg-main/20 text-xs" value="Senior Full-Stack Architect" />
+            <input type="text" id="cv-contact" placeholder="Email, Phone, Location" class="p-2.5 rounded-lg border border-border-card bg-bg-main/20 text-xs" value="jane@doe.com | San Francisco, CA" />
+          </div>
+        </div>
+
+        <!-- Experience -->
+        <div>
+          <h4 class="text-xs font-bold text-accent mb-2">Work Experience</h4>
+          <textarea id="cv-experience" rows="4" class="w-full p-3 rounded-lg border border-border-card bg-bg-main/20 text-xs font-mono" placeholder="Job details...">Senior Engineer @ Vercel (2024 - Present)
+- Lead core serverless framework optimizations.
+- Architected next-gen edge rendering layers.
+
+Staff Developer @ Stripe (2021 - 2024)
+- Optimized developer API tooling portals client engines.</textarea>
+        </div>
+
+        <!-- Education & Skills -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <h4 class="text-xs font-bold text-text-main mb-2">Education</h4>
+            <textarea id="cv-education" rows="3" class="w-full p-3 rounded-lg border border-border-card bg-bg-main/20 text-xs font-mono" placeholder="School details...">B.S. Computer Science | Stanford University (2017 - 2021)</textarea>
+          </div>
+          <div>
+            <h4 class="text-xs font-bold text-text-main mb-2">Technical Skills</h4>
+            <textarea id="cv-skills" rows="3" class="w-full p-3 rounded-lg border border-border-card bg-bg-main/20 text-xs font-mono" placeholder="Skills list...">TypeScript, React, Astro, Node.js, AWS Cloud, Rust</textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  )}
+</div>
+
+<!-- Print Styles Template container -->
+<div id="print-container-frame" class="hidden"></div>
+
+<script define:vars={{ toolId: id }}>
+  // Notes Notepad controller
+  if (toolId === 'notes') {
+    const pad = document.getElementById('notepad-textarea');
+    const wordCount = document.getElementById('notepad-word-count');
+    const charCount = document.getElementById('notepad-char-count');
+    const clearBtn = document.getElementById('notepad-clear-btn');
+
+    // Load
+    const loadedNotes = localStorage.getItem('toolverse_scratchpad_notes') || '';
+    if (pad) {
+      pad.value = loadedNotes;
+      updateStats(loadedNotes);
+    }
+
+    function updateStats(text) {
+      if (charCount) charCount.textContent = text.length;
+      if (wordCount) {
+        const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+        wordCount.textContent = words;
+      }
+    }
+
+    pad?.addEventListener('input', (e) => {
+      const val = e.target.value;
+      localStorage.setItem('toolverse_scratchpad_notes', val);
+      updateStats(val);
+    });
+
+    clearBtn?.addEventListener('click', () => {
+      if (confirm('Clear scratch notes?')) {
+        if (pad) pad.value = '';
+        localStorage.setItem('toolverse_scratchpad_notes', '');
+        updateStats('');
+        window.showToast?.('Notepad cleared', 'success');
+      }
+    });
+  }
+
+  // Typing Tester controller
+  if (toolId === 'typing-speed-test') {
+    const prompt = document.getElementById('typing-prompt').textContent.trim();
+    const input = document.getElementById('typing-input-area');
+    const wpmEl = document.getElementById('typing-wpm');
+    const accEl = document.getElementById('typing-accuracy');
+    const timeEl = document.getElementById('typing-timer');
+    const resetBtn = document.getElementById('typing-reset-btn');
+
+    let startTime = null;
+    let timerInterval = null;
+    let elapsed = 0;
+
+    input?.addEventListener('input', () => {
+      if (!startTime) {
+        startTime = Date.now();
+        timerInterval = setInterval(() => {
+          elapsed = Math.floor((Date.now() - startTime) / 1000);
+          if (timeEl) timeEl.textContent = `${elapsed}s`;
+          calculateStats();
+        }, 1000);
+      }
+      calculateStats();
+    });
+
+    function calculateStats() {
+      const typed = input.value;
+      let matches = 0;
+      
+      // Calculate errors
+      for (let i = 0; i < typed.length; i++) {
+        if (typed[i] === prompt[i]) matches++;
+      }
+
+      const acc = typed.length === 0 ? 100 : Math.round((matches / typed.length) * 100);
+      if (accEl) accEl.textContent = `${acc}%`;
+
+      // WPM = (words count) / (minutes)
+      const wpm = typed.length === 0 ? 0 : Math.round((typed.length / 5) / ((elapsed || 1) / 60));
+      if (wpmEl) wpmEl.textContent = wpm;
+
+      // Completion
+      if (typed.length >= prompt.length) {
+        clearInterval(timerInterval);
+        window.showToast?.('Test complete! Great job.', 'success');
+      }
+    }
+
+    resetBtn?.addEventListener('click', () => {
+      if (input) input.value = '';
+      if (wpmEl) wpmEl.textContent = '0';
+      if (accEl) accEl.textContent = '100%';
+      if (timeEl) timeEl.textContent = '0s';
+      clearInterval(timerInterval);
+      startTime = null;
+      elapsed = 0;
+    });
+  }
+
+  // Clipboard inspector
+  if (toolId === 'clipboard') {
+    const pasteBtn = document.getElementById('clip-paste-btn');
+    const cleanBtn = document.getElementById('clip-clean-btn');
+    const textPad = document.getElementById('clip-textarea');
+
+    pasteBtn?.addEventListener('click', async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (textPad) textPad.value = text;
+        window.showToast?.('Clipboard read successfully!', 'success');
+      } catch (err) {
+        window.showToast?.('Clipboard permission denied', 'error');
+      }
+    });
+
+    cleanBtn?.addEventListener('click', () => {
+      if (textPad) textPad.value = '';
+      window.showToast?.('Cleaned inspector', 'success');
+    });
+  }
+
+  // Invoice creator & printing
+  if (toolId === 'invoice-generator') {
+    const addRowBtn = document.getElementById('invoice-add-item');
+    const itemsRows = document.getElementById('invoice-items-rows');
+    const totalSpan = document.getElementById('invoice-total');
+    const printBtn = document.getElementById('invoice-print-btn');
+
+    addRowBtn?.addEventListener('click', () => {
+      const row = document.createElement('div');
+      row.className = 'flex gap-2 inv-item-row';
+      row.innerHTML = `
+        <input type="text" placeholder="Item Description" class="flex-grow p-2 rounded border border-border-card bg-bg-main/20 text-xs" value="Consulting Services" />
+        <input type="number" placeholder="Qty" class="w-16 p-2 rounded border border-border-card bg-bg-main/20 text-xs text-center" value="1" />
+        <input type="number" placeholder="Rate" class="w-24 p-2 rounded border border-border-card bg-bg-main/20 text-xs text-right" value="100" />
+        <button class="remove-inv-item text-text-muted hover:text-rose-400 p-2"><svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+      `;
+      itemsRows?.appendChild(row);
+      updateTotal();
+    });
+
+    itemsRows?.addEventListener('click', (e) => {
+      const target = e.target;
+      const removeBtn = target.closest('.remove-inv-item');
+      if (removeBtn) {
+        removeBtn.closest('.inv-item-row')?.remove();
+        updateTotal();
+      }
+    });
+
+    itemsRows?.addEventListener('input', updateTotal);
+
+    function updateTotal() {
+      let sum = 0;
+      document.querySelectorAll('.inv-item-row').forEach(row => {
+        const inputs = row.querySelectorAll('input');
+        const qty = parseFloat(inputs[1]?.value) || 0;
+        const rate = parseFloat(inputs[2]?.value) || 0;
+        sum += qty * rate;
+      });
+      if (totalSpan) totalSpan.textContent = `$${sum.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+    }
+
+    printBtn?.addEventListener('click', () => {
+      const sName = document.getElementById('inv-seller-name').value;
+      const sAddress = document.getElementById('inv-seller-address').value;
+      const cName = document.getElementById('inv-client-name').value;
+      const cAddress = document.getElementById('inv-client-address').value;
+
+      let itemsHtml = '';
+      document.querySelectorAll('.inv-item-row').forEach(row => {
+        const inputs = row.querySelectorAll('input');
+        const desc = inputs[0]?.value;
+        const qty = inputs[1]?.value;
+        const rate = inputs[2]?.value;
+        const total = (parseFloat(qty) || 0) * (parseFloat(rate) || 0);
+        itemsHtml += `
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #ddd;">${desc}</td>
+            <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: center;">${qty}</td>
+            <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;">$${rate}</td>
+            <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;">$${total.toFixed(2)}</td>
+          </tr>
+        `;
+      });
+
+      const printFrame = document.getElementById('print-container-frame');
+      if (printFrame) {
+        printFrame.innerHTML = `
+          <div style="font-family: system-ui, sans-serif; padding: 40px; color: #18181b;">
+            <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #6366f1; padding-bottom: 20px;">
+              <div>
+                <h2>INVOICE</h2>
+                <p><strong>From:</strong> ${sName}<br/>${sAddress}</p>
+              </div>
+              <div style="text-align: right;">
+                <h3>ToolVerse Invoices</h3>
+                <p>Date: ${new Date().toLocaleDateString()}</p>
+              </div>
+            </div>
+            <div style="margin-top: 30px;">
+              <p><strong>Bill To:</strong><br/>${cName}<br/>${cAddress}</p>
+            </div>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 35px;">
+              <thead>
+                <tr style="background: #f4f4f5;">
+                  <th style="padding: 10px; text-align: left;">Item Description</th>
+                  <th style="padding: 10px; text-align: center; width: 60px;">Qty</th>
+                  <th style="padding: 10px; text-align: right; width: 100px;">Rate</th>
+                  <th style="padding: 10px; text-align: right; width: 120px;">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsHtml}
+              </tbody>
+            </table>
+            <div style="text-align: right; margin-top: 40px; font-size: 16px; font-weight: bold;">
+              Total Invoice Amount: ${totalSpan.textContent}
+            </div>
+          </div>
+        `;
+        
+        const originalHtml = document.body.innerHTML;
+        document.body.innerHTML = printFrame.innerHTML;
+        window.print();
+        document.body.innerHTML = originalHtml;
+        window.location.reload(); // reload to restore script hooks
+      }
+    });
+  }
+
+  // Resume builder printing
+  if (toolId === 'resume-builder') {
+    const printBtn = document.getElementById('resume-print-btn');
+
+    printBtn?.addEventListener('click', () => {
+      const name = document.getElementById('cv-name').value;
+      const title = document.getElementById('cv-title').value;
+      const contact = document.getElementById('cv-contact').value;
+      const exp = document.getElementById('cv-experience').value.replace(/\n/g, '<br/>');
+      const edu = document.getElementById('cv-education').value.replace(/\n/g, '<br/>');
+      const skills = document.getElementById('cv-skills').value.replace(/\n/g, '<br/>');
+
+      const printFrame = document.getElementById('print-container-frame');
+      if (printFrame) {
+        printFrame.innerHTML = `
+          <div style="font-family: system-ui, sans-serif; padding: 40px; color: #18181b; max-width: 800px; margin: 0 auto; line-height: 1.6;">
+            <header style="border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 25px;">
+              <h1 style="margin: 0; font-size: 32px; font-weight: 800;">${name}</h1>
+              <h3 style="margin: 5px 0 0 0; color: #4f46e5;">${title}</h3>
+              <p style="margin: 5px 0 0 0; font-size: 13px; color: #52525b;">${contact}</p>
+            </header>
+            <section style="margin-bottom: 25px;">
+              <h3 style="border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 10px; font-size: 16px; text-transform: uppercase;">Professional Experience</h3>
+              <p style="font-size: 13px; white-space: pre-wrap;">${exp}</p>
+            </section>
+            <div style="display: grid; grid-template-cols: 1fr 1fr; gap: 20px;">
+              <section>
+                <h3 style="border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 10px; font-size: 16px; text-transform: uppercase;">Education</h3>
+                <p style="font-size: 13px; white-space: pre-wrap;">${edu}</p>
+              </section>
+              <section>
+                <h3 style="border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 10px; font-size: 16px; text-transform: uppercase;">Skills</h3>
+                <p style="font-size: 13px; white-space: pre-wrap;">${skills}</p>
+              </section>
+            </div>
+          </div>
+        `;
+        
+        const originalHtml = document.body.innerHTML;
+        document.body.innerHTML = printFrame.innerHTML;
+        window.print();
+        document.body.innerHTML = originalHtml;
+        window.location.reload();
+      }
+    });
+  }
+</script>

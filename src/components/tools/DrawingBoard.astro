@@ -1,0 +1,220 @@
+---
+import { Pencil, Square, Circle, Trash2, Download, CircleDot } from '@lucide/astro';
+
+interface Props {
+  id: string;
+}
+
+const { id } = Astro.props;
+---
+
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+  <!-- Controls -->
+  <div class="glass-card p-5 rounded-2xl space-y-4 h-fit">
+    <h3 class="text-sm font-bold uppercase tracking-wider text-text-main border-b border-border-card pb-2">
+      Canvas Tools
+    </h3>
+
+    <!-- Brush color -->
+    <div>
+      <label class="tool-label text-xs">Brush Color</label>
+      <input type="color" id="draw-color-picker" value="#6366f1" class="w-full h-10 p-1 bg-bg-main/30 rounded-xl border border-border-card cursor-pointer" />
+    </div>
+
+    <!-- Brush size -->
+    <div>
+      <label class="tool-label text-xs">Brush Size (px)</label>
+      <div class="flex items-center gap-3">
+        <input type="range" id="draw-size-slider" min="2" max="50" value="6" class="flex-grow accent-primary" />
+        <span id="draw-size-span" class="text-xs font-mono font-bold text-primary">6px</span>
+      </div>
+    </div>
+
+    <!-- Drawing tool shapes selection -->
+    <div>
+      <label class="tool-label text-xs">Drawing Mode</label>
+      <div class="grid grid-cols-2 gap-2">
+        <button id="tool-pencil" class="tool-btn tool-btn-primary py-2 px-3 text-xs flex items-center justify-center gap-1.5">
+          <Pencil class="h-3.5 w-3.5" /> Pen
+        </button>
+        <button id="tool-eraser" class="tool-btn tool-btn-secondary py-2 px-3 text-xs flex items-center justify-center gap-1.5">
+          <CircleDot class="h-3.5 w-3.5" /> Eraser
+        </button>
+        
+        {id === 'whiteboard' && (
+          <>
+            <button id="tool-rect" class="tool-btn tool-btn-secondary py-2 px-3 text-xs flex items-center justify-center gap-1.5">
+              <Square class="h-3.5 w-3.5" /> Rect
+            </button>
+            <button id="tool-circle" class="tool-btn tool-btn-secondary py-2 px-3 text-xs flex items-center justify-center gap-1.5">
+              <Circle class="h-3.5 w-3.5" /> Circle
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex flex-col gap-2 pt-4 border-t border-border-card">
+      <button id="draw-download-btn" class="tool-btn tool-btn-primary py-2 px-3 text-xs flex items-center justify-center gap-1">
+        <Download class="h-3.5 w-3.5" /> Save Sketch
+      </button>
+      <button id="draw-clear-btn" class="tool-btn tool-btn-secondary py-2 px-3 text-xs flex items-center justify-center gap-1">
+        <Trash2 class="h-3.5 w-3.5" /> Reset Canvas
+      </button>
+    </div>
+  </div>
+
+  <!-- Drawing Canvas -->
+  <div class="lg:col-span-3">
+    <div class="glass-card p-4 rounded-2xl">
+      <div class="bg-white rounded-xl border border-border-card overflow-hidden relative" style="height: 480px;">
+        <canvas id="drawing-canvas-element" class="w-full h-full cursor-crosshair bg-white"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script define:vars={{ toolId: id }}>
+  const canvas = document.getElementById('drawing-canvas-element');
+  const ctx = canvas?.getContext('2d');
+  
+  const colorPicker = document.getElementById('draw-color-picker');
+  const sizeSlider = document.getElementById('draw-size-slider');
+  const sizeSpan = document.getElementById('draw-size-span');
+
+  const btnPencil = document.getElementById('tool-pencil');
+  const btnEraser = document.getElementById('tool-eraser');
+  const btnRect = document.getElementById('tool-rect');
+  const btnCircle = document.getElementById('tool-circle');
+  const btnClear = document.getElementById('draw-clear-btn');
+  const btnDownload = document.getElementById('draw-download-btn');
+
+  let isDrawing = false;
+  let currentMode = 'pencil'; // pencil, eraser, rect, circle
+  let startX = 0;
+  let startY = 0;
+  
+  // Keep snapshot of canvas before drawing shape
+  let snapshot = null;
+
+  // Handle resizing/init of canvas size
+  const initCanvas = () => {
+    if (!canvas || !ctx) return;
+    const rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+    
+    // Clear back white
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Config line joins
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+  };
+
+  // Sync brush size slider text
+  sizeSlider?.addEventListener('input', (e) => {
+    if (sizeSpan) sizeSpan.textContent = `${e.target.value}px`;
+  });
+
+  // Toggle modes helper
+  const setMode = (mode, activeBtn) => {
+    currentMode = mode;
+    [btnPencil, btnEraser, btnRect, btnCircle].forEach(btn => {
+      if (!btn) return;
+      btn.className = 'tool-btn tool-btn-secondary py-2 px-3 text-xs flex items-center justify-center gap-1.5';
+    });
+    if (activeBtn) {
+      activeBtn.className = 'tool-btn tool-btn-primary py-2 px-3 text-xs flex items-center justify-center gap-1.5';
+    }
+  };
+
+  btnPencil?.addEventListener('click', () => setMode('pencil', btnPencil));
+  btnEraser?.addEventListener('click', () => setMode('eraser', btnEraser));
+  btnRect?.addEventListener('click', () => setMode('rect', btnRect));
+  btnCircle?.addEventListener('click', () => setMode('circle', btnCircle));
+
+  // Canvas drawing logic
+  const startDraw = (e) => {
+    if (!canvas || !ctx) return;
+    isDrawing = true;
+    
+    // Get correct client coords relative to canvas
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX || e.touches[0].clientX) - rect.left;
+    const y = (e.clientY || e.touches[0].clientY) - rect.top;
+    
+    startX = x;
+    startY = y;
+    
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+
+    // Apply colors and sizes
+    ctx.lineWidth = parseInt(sizeSlider?.value || '6');
+    ctx.strokeStyle = currentMode === 'eraser' ? '#ffffff' : (colorPicker?.value || '#6366f1');
+    
+    // Take snapshot for shape dragging
+    snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  };
+
+  const drawing = (e) => {
+    if (!isDrawing || !canvas || !ctx) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+    const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+
+    if (currentMode === 'pencil' || currentMode === 'eraser') {
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    } else {
+      // Restore snapshot first to preview shapes while dragging
+      if (snapshot) ctx.putImageData(snapshot, 0, 0);
+      
+      if (currentMode === 'rect') {
+        ctx.strokeRect(startX, startY, x - startX, y - startY);
+      } else if (currentMode === 'circle') {
+        const radius = Math.sqrt(Math.pow(x - startX, 2) + Math.pow(y - startY, 2));
+        ctx.beginPath();
+        ctx.arc(startX, startY, radius, 0, 2 * Math.PI);
+        ctx.stroke();
+      }
+    }
+  };
+
+  const stopDraw = () => {
+    isDrawing = false;
+  };
+
+  // Attach mouse events
+  canvas?.addEventListener('mousedown', startDraw);
+  canvas?.addEventListener('mousemove', drawing);
+  canvas?.addEventListener('mouseup', stopDraw);
+  canvas?.addEventListener('mouseleave', stopDraw);
+
+  // Attach mobile touch events
+  canvas?.addEventListener('touchstart', (e) => { e.preventDefault(); startDraw(e); });
+  canvas?.addEventListener('touchmove', (e) => { e.preventDefault(); drawing(e); });
+  canvas?.addEventListener('touchend', stopDraw);
+
+  // Clear Canvas
+  btnClear?.addEventListener('click', () => {
+    if (confirm('Clear canvas?')) initCanvas();
+  });
+
+  // Save Image
+  btnDownload?.addEventListener('click', () => {
+    if (!canvas) return;
+    const link = document.createElement('a');
+    link.download = `toolverse-${toolId}-drawing.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    window.showToast?.('Drawing saved as PNG!', 'success');
+  });
+
+  // Initialize
+  setTimeout(initCanvas, 100);
+</script>

@@ -1,0 +1,232 @@
+---
+import { Upload, Download, Maximize, FileCode } from '@lucide/astro';
+
+interface Props {
+  id: string;
+}
+
+const { id } = Astro.props;
+---
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <!-- Controls Panel -->
+  <div class="glass-card p-6 rounded-2xl space-y-4">
+    <h3 class="text-sm font-bold uppercase tracking-wider text-text-main border-b border-border-card pb-2">
+      File Upload & Parameters
+    </h3>
+    
+    <!-- Drag & Drop area -->
+    <div 
+      id="img-dropzone" 
+      class="border-2 border-dashed border-border-card rounded-2xl p-8 text-center flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 transition-colors duration-200"
+    >
+      <Upload class="h-8 w-8 text-text-muted mb-3 animate-pulse-slow" />
+      <p class="text-xs text-text-main font-semibold">Drag & drop image here or click to browse</p>
+      <p class="text-[10px] text-text-muted mt-1.5">Supports PNG, JPEG, WEBP and SVG</p>
+      <input type="file" id="img-file-input" accept="image/*" class="hidden" />
+    </div>
+
+    <!-- Parameter blocks depending on tool ID -->
+    {id === 'image-compressor' && (
+      <div>
+        <label class="tool-label text-xs">Compression Quality (%)</label>
+        <div class="flex items-center gap-3">
+          <input type="range" id="compress-quality" min="10" max="100" value="80" class="flex-grow accent-primary" />
+          <span id="compress-quality-span" class="text-xs font-mono font-bold text-primary">80%</span>
+        </div>
+      </div>
+    )}
+
+    {id === 'image-resizer' && (
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="tool-label text-xs">Width (px)</label>
+          <input type="number" id="resize-width" placeholder="e.g. 1920" class="w-full p-2.5 rounded-xl border border-border-card bg-bg-main/30 text-xs focus:outline-none" />
+        </div>
+        <div>
+          <label class="tool-label text-xs">Height (px)</label>
+          <input type="number" id="resize-height" placeholder="e.g. 1080" class="w-full p-2.5 rounded-xl border border-border-card bg-bg-main/30 text-xs focus:outline-none" />
+        </div>
+      </div>
+    )}
+
+    {id === 'image-to-base64' && (
+      <div>
+        <p class="text-xs text-text-muted">Once uploaded, the Base64 data URI string will automatically generate.</p>
+      </div>
+    )}
+
+    <!-- Process triggers -->
+    <div class="flex gap-2 border-t border-border-card pt-4 mt-4">
+      <button id="process-img-btn" class="tool-btn tool-btn-primary py-2 px-4 text-xs">
+        Process Image
+      </button>
+      <button id="clear-img-btn" class="tool-btn tool-btn-secondary py-2 px-4 text-xs">
+        Reset
+      </button>
+    </div>
+  </div>
+
+  <!-- Output / Preview Panel -->
+  <div class="glass-card p-6 rounded-2xl flex flex-col justify-between">
+    <h3 class="text-sm font-bold uppercase tracking-wider text-text-main border-b border-border-card pb-2 mb-4">
+      Processed Preview
+    </h3>
+
+    <!-- Preview Area -->
+    <div class="flex-grow flex items-center justify-center min-h-[220px] bg-bg-main/30 border border-border-card rounded-xl overflow-hidden p-4 relative">
+      <div id="preview-placeholder" class="text-xs text-text-muted text-center">
+        Upload an image to see results here
+      </div>
+      <img id="output-image-tag" class="max-w-full max-h-[300px] rounded-lg hidden shadow-lg" />
+      
+      <!-- Base64 string Output area -->
+      <div id="base64-output-container" class="w-full h-full hidden flex flex-col gap-2">
+        <textarea id="base64-output-textarea" readonly rows="8" class="w-full p-2.5 rounded-xl border border-border-card bg-bg-main/50 text-[10px] font-mono focus:outline-none"></textarea>
+        <button id="copy-base64-btn" class="tool-btn tool-btn-secondary py-1.5 text-xs flex items-center justify-center gap-1">
+          Copy Base64 String
+        </button>
+      </div>
+    </div>
+
+    <!-- Download link -->
+    <a id="download-img-link" class="tool-btn tool-btn-primary py-2 px-4 text-xs flex items-center justify-center gap-1 mt-4 hidden">
+      <Download class="h-3.5 w-3.5" /> Download Image file
+    </a>
+  </div>
+</div>
+
+<script define:vars={{ toolId: id }}>
+  const dropzone = document.getElementById('img-dropzone');
+  const fileInput = document.getElementById('img-file-input');
+  const processBtn = document.getElementById('process-img-btn');
+  const clearBtn = document.getElementById('clear-img-btn');
+  const placeholder = document.getElementById('preview-placeholder');
+  const imgTag = document.getElementById('output-image-tag');
+  
+  const b64Container = document.getElementById('base64-output-container');
+  const b64Textarea = document.getElementById('base64-output-textarea');
+  const b64CopyBtn = document.getElementById('copy-base64-btn');
+  const dlLink = document.getElementById('download-img-link');
+
+  let activeImage = null;
+
+  // Sync sliders
+  const qualitySlider = document.getElementById('compress-quality');
+  const qualitySpan = document.getElementById('compress-quality-span');
+  qualitySlider?.addEventListener('input', (e) => {
+    if (qualitySpan) qualitySpan.textContent = `${e.target.value}%`;
+  });
+
+  // Dropzone clicks
+  dropzone?.addEventListener('click', () => fileInput?.click());
+  fileInput?.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) handleFile(file);
+  });
+
+  // Drag over
+  dropzone?.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropzone.classList.add('border-primary/50');
+  });
+  dropzone?.addEventListener('dragleave', () => {
+    dropzone.classList.remove('border-primary/50');
+  });
+  dropzone?.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('border-primary/50');
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  });
+
+  const handleFile = (file) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        activeImage = img;
+        placeholder?.classList.add('hidden');
+        imgTag?.classList.remove('hidden');
+        imgTag.src = event.target.result;
+        
+        // Auto-populate resize dimensions
+        const rWidth = document.getElementById('resize-width');
+        const rHeight = document.getElementById('resize-height');
+        if (rWidth) rWidth.value = img.width;
+        if (rHeight) rHeight.value = img.height;
+
+        // Auto process base64
+        if (toolId === 'image-to-base64') {
+          b64Container?.classList.remove('hidden');
+          imgTag?.classList.add('hidden');
+          b64Textarea.value = event.target.result;
+        }
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  processBtn?.addEventListener('click', () => {
+    if (!activeImage) {
+      window.showToast?.('Please upload an image first', 'error');
+      return;
+    }
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    let targetWidth = activeImage.width;
+    let targetHeight = activeImage.height;
+
+    // Resizer sizing override
+    if (toolId === 'image-resizer') {
+      const rWidth = parseInt(document.getElementById('resize-width').value) || activeImage.width;
+      const rHeight = parseInt(document.getElementById('resize-height').value) || activeImage.height;
+      targetWidth = rWidth;
+      targetHeight = rHeight;
+    }
+
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+    ctx.drawImage(activeImage, 0, 0, targetWidth, targetHeight);
+
+    let mimeType = 'image/jpeg';
+    let quality = 0.8;
+
+    if (toolId === 'image-compressor') {
+      quality = parseInt(qualitySlider.value) / 100;
+    }
+
+    const exportUrl = canvas.toDataURL(mimeType, quality);
+    imgTag.src = exportUrl;
+    imgTag?.classList.remove('hidden');
+
+    // Show download link
+    if (dlLink) {
+      dlLink.href = exportUrl;
+      dlLink.download = `toolverse-${toolId}.jpg`;
+      dlLink.classList.remove('hidden');
+    }
+    
+    window.showToast?.('Image processed successfully!', 'success');
+  });
+
+  b64CopyBtn?.addEventListener('click', () => {
+    if (b64Textarea?.value) {
+      navigator.clipboard.writeText(b64Textarea.value);
+      window.showToast?.('Base64 string copied!', 'success');
+    }
+  });
+
+  clearBtn?.addEventListener('click', () => {
+    activeImage = null;
+    if (fileInput) fileInput.value = '';
+    placeholder?.classList.remove('hidden');
+    imgTag?.classList.add('hidden');
+    b64Container?.classList.add('hidden');
+    dlLink?.classList.add('hidden');
+    window.showToast?.('Cleared canvas', 'success');
+  });
+</script>

@@ -1,0 +1,68 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { ShieldAlert, Zap, Globe2, HelpCircle } from '@lucide/astro';
+---
+
+<Layout 
+  title="About Us - ToolVerse"
+  description="Learn about ToolVerse, our mission to build 100% secure, offline-first client-side web utility tools, and how we keep your data private."
+>
+  <div class="max-w-3xl mx-auto space-y-12">
+    <!-- Header -->
+    <div class="text-center py-6">
+      <h1 class="text-4xl font-extrabold text-text-main">About ToolVerse</h1>
+      <p class="text-xs sm:text-sm text-text-muted mt-3">The security-first, browser-native utility catalog for developers.</p>
+    </div>
+
+    <!-- Pitch card -->
+    <div class="glass-panel p-8 rounded-3xl space-y-4">
+      <h2 class="text-xl font-bold text-text-main">Our Philosophy</h2>
+      <p class="text-xs sm:text-sm text-text-muted leading-relaxed">
+        Developers around the world copy and paste sensitive code, passwords, API tokens, and customer JSON payloads into random online tools every day. 
+        Most online converters upload inputs to remote servers, risking leaks and data scraping.
+      </p>
+      <p class="text-xs sm:text-sm text-text-muted leading-relaxed">
+        <strong>ToolVerse solves this.</strong> We built a client-side suite of 100+ utilities where everything—from SHA hashing to PDF generation—executes directly inside your browser container. 
+        No server queues, no backend logs, and zero tracking. Your work never leaves your local environment.
+      </p>
+    </div>
+
+    <!-- Core Features Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <div class="glass-card p-5 rounded-2xl">
+        <div class="h-10 w-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-4">
+          <Zap class="h-5 w-5" />
+        </div>
+        <h3 class="text-sm font-bold text-text-main">Local Processing</h3>
+        <p class="text-xs text-text-muted mt-2 leading-relaxed">Runs in browser sandboxed workers. Zero upload latency.</p>
+      </div>
+
+      <div class="glass-card p-5 rounded-2xl">
+        <div class="h-10 w-10 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent mb-4">
+          <ShieldAlert class="h-5 w-5" />
+        </div>
+        <h3 class="text-sm font-bold text-text-main">Privacy First</h3>
+        <p class="text-xs text-text-muted mt-2 leading-relaxed">GDPR/CCPA compliant by design. We save nothing on backend logs.</p>
+      </div>
+
+      <div class="glass-card p-5 rounded-2xl">
+        <div class="h-10 w-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-4">
+          <Globe2 class="h-5 w-5" />
+        </div>
+        <h3 class="text-sm font-bold text-text-main">Offline Friendly</h3>
+        <p class="text-xs text-text-muted mt-2 leading-relaxed">Installable as a Progressive Web App (PWA) to run offline.</p>
+      </div>
+    </div>
+
+    <!-- FAQ callout -->
+    <div class="p-6 border border-border-card bg-bg-card/50 rounded-2xl flex items-start gap-4">
+      <HelpCircle class="h-6 w-6 text-primary shrink-0 mt-0.5" />
+      <div>
+        <h3 class="text-sm font-bold text-text-main">Need specialized integrations?</h3>
+        <p class="text-xs text-text-muted mt-1 leading-relaxed">
+          ToolVerse is fully open-source. You can run it on your private company Intranet or contribute custom runners in our repository. Contact our support team for setup parameters.
+        </p>
+      </div>
+    </div>
+  </div>
+</Layout>

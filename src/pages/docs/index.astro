@@ -1,0 +1,119 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { BookOpen, Key, Keyboard, ShieldAlert, Cpu } from '@lucide/astro';
+---
+
+<Layout 
+  title="Documentation - ToolVerse"
+  description="Read the documentation for ToolVerse. Learn about offline configurations, local sandboxes, and integrating client-side Gemini AI models."
+>
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 py-6">
+    <!-- Docs Navigation Sidebar -->
+    <aside class="space-y-4 lg:col-span-1">
+      <div class="glass-card p-5 rounded-2xl">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-primary mb-3">Documentation</h3>
+        <ul class="space-y-2 text-xs text-text-muted">
+          <li><a href="#getting-started" class="block p-1.5 rounded hover:text-text-main hover:bg-border-card transition-colors">Getting Started</a></li>
+          <li><a href="#security-model" class="block p-1.5 rounded hover:text-text-main hover:bg-border-card transition-colors">Security & Privacy</a></li>
+          <li><a href="#gemini-ai" class="block p-1.5 rounded hover:text-text-main hover:bg-border-card transition-colors">Gemini AI Keys</a></li>
+          <li><a href="#shortcuts" class="block p-1.5 rounded hover:text-text-main hover:bg-border-card transition-colors">Keyboard Shortcuts</a></li>
+          <li><a href="#self-hosting" class="block p-1.5 rounded hover:text-text-main hover:bg-border-card transition-colors">Self-Hosting Guide</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Docs Content Area -->
+    <section class="lg:col-span-3 space-y-12">
+      <!-- Welcome Header -->
+      <div>
+        <h1 class="text-3xl font-extrabold text-text-main flex items-center gap-2">
+          <BookOpen class="h-8 w-8 text-primary" /> Technical Documentation
+        </h1>
+        <p class="text-xs sm:text-sm text-text-muted mt-2">Learn how to customize, run, and self-host ToolVerse in your workflow.</p>
+      </div>
+
+      <!-- Getting Started -->
+      <div id="getting-started" class="glass-card p-6 sm:p-8 rounded-2xl space-y-3 scroll-mt-20">
+        <h2 class="text-lg font-bold text-text-main flex items-center gap-1.5"><Cpu class="h-5 w-5 text-primary" /> 1. Getting Started</h2>
+        <p class="text-xs sm:text-sm text-text-muted leading-relaxed">
+          ToolVerse is a client-side toolbox providing 100+ developer utilities. You can access tools by navigating the homepage categories or launching the global search index palette.
+        </p>
+        <p class="text-xs sm:text-sm text-text-muted leading-relaxed">
+          Because execution happens client-side inside standard Javascript modules and Web Workers, you do not need to install local CLI dependencies or buy server subscriptions.
+        </p>
+      </div>
+
+      <!-- Security model -->
+      <div id="security-model" class="glass-card p-6 sm:p-8 rounded-2xl space-y-3 scroll-mt-20">
+        <h2 class="text-lg font-bold text-text-main flex items-center gap-1.5"><ShieldAlert class="h-5 w-5 text-accent" /> 2. Security & Privacy Sandbox</h2>
+        <p class="text-xs sm:text-sm text-text-muted leading-relaxed">
+          Our security model is built on browser isolation. When you run validators, parsers or formatters:
+        </p>
+        <ul class="list-disc list-inside text-xs sm:text-sm text-text-muted space-y-1.5 pl-2 leading-relaxed">
+          <li>Data processing is handled completely locally in browser storage/memory.</li>
+          <li>No analytics tracker logs your textarea payload inputs.</li>
+          <li>Files generated (images, invoices, codes) use local canvas blob URL exports.</li>
+        </ul>
+      </div>
+
+      <!-- Gemini AI -->
+      <div id="gemini-ai" class="glass-card p-6 sm:p-8 rounded-2xl space-y-3 scroll-mt-20">
+        <h2 class="text-lg font-bold text-text-main flex items-center gap-1.5"><Key class="h-5 w-5 text-amber-500" /> 3. Gemini AI Configuration</h2>
+        <p class="text-xs sm:text-sm text-text-muted leading-relaxed">
+          ToolVerse AI coding assistance options utilize Google's Gemini models client-side.
+        </p>
+        <p class="text-xs sm:text-sm text-text-muted leading-relaxed">
+          To run live queries, enter your <strong>Google Gemini API Key</strong> in the tool inputs banner. Keys remain transiently inside memory storage and never sync to our servers. If no key is entered, the app defaults to simulation mode to test layout outputs.
+        </p>
+      </div>
+
+      <!-- Shortcuts -->
+      <div id="shortcuts" class="glass-card p-6 sm:p-8 rounded-2xl space-y-3 scroll-mt-20">
+        <h2 class="text-lg font-bold text-text-main flex items-center gap-1.5"><Keyboard class="h-5 w-5 text-primary" /> 4. Keyboard Shortcuts</h2>
+        <p class="text-xs sm:text-sm text-text-muted leading-relaxed">Navigate ToolVerse instantly with integrated hotkeys:</p>
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse text-xs sm:text-sm text-left">
+            <thead>
+              <tr class="border-b border-border-card">
+                <th class="py-2 pr-4 font-bold text-text-main">Action</th>
+                <th class="py-2 font-bold text-text-main">Keyboard Shortcut</th>
+              </tr>
+            </thead>
+            <tbody class="text-text-muted">
+              <tr class="border-b border-border-card">
+                <td class="py-2.5 pr-4">Launch Command Search Palette</td>
+                <td class="py-2.5"><kbd class="px-1.5 py-0.5 rounded border border-border-card bg-bg-card font-mono text-[10px]">Ctrl + K</kbd> / <kbd class="px-1.5 py-0.5 rounded border border-border-card bg-bg-card font-mono text-[10px]">Cmd + K</kbd></td>
+              </tr>
+              <tr class="border-b border-border-card">
+                <td class="py-2.5 pr-4">Close Active Dialog / Modals</td>
+                <td class="py-2.5"><kbd class="px-1.5 py-0.5 rounded border border-border-card bg-bg-card font-mono text-[10px]">ESC</kbd></td>
+              </tr>
+              <tr class="border-b border-border-card">
+                <td class="py-2.5 pr-4">Navigate Search List</td>
+                <td class="py-2.5"><kbd class="px-1.5 py-0.5 rounded border border-border-card bg-bg-card font-mono text-[10px]">↓ / ↑ Arrow Keys</kbd></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Self Hosting -->
+      <div id="self-hosting" class="glass-card p-6 sm:p-8 rounded-2xl space-y-3 scroll-mt-20">
+        <h2 class="text-lg font-bold text-text-main">5. Enterprise Self-Hosting Guide</h2>
+        <p class="text-xs sm:text-sm text-text-muted leading-relaxed">
+          Because there is no database or backend dependencies, you can compile and deploy ToolVerse as a static asset bundle anywhere:
+        </p>
+        <pre class="bg-black/40 p-4 rounded-xl text-[11px] font-mono text-primary border border-border-card overflow-x-auto"># Clone & install dependencies
+git clone https://github.com/toolverse/toolverse.git
+cd toolverse
+npm install
+
+# Build static production assets
+npm run build
+
+# Preview static outputs locally
+npm run preview</pre>
+      </div>
+    </section>
+  </div>
+</Layout>

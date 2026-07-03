@@ -1,0 +1,374 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ToolCard from '../components/ToolCard.astro';
+import DynamicIcon from '../components/DynamicIcon.astro';
+import { allTools, CATEGORIES } from '../data/tools';
+import { Sparkles, Search, ShieldCheck, Zap, Laptop, ArrowRight, HelpCircle } from '@lucide/astro';
+
+// Get trending tools (let's pick 4 popular ones for desktop grid matching)
+const trendingIds = ['ai-code-generator', 'json-formatter', 'password-generator', 'qr-generator'];
+const trendingTools = allTools.filter(t => trendingIds.includes(t.id));
+
+// Calculate tool counts for each category
+const categoryCounts = CATEGORIES.slice(0, 6).map(cat => {
+  const count = allTools.filter(t => t.category === cat.name).length;
+  return { ...cat, count };
+});
+
+const faqs = [
+  {
+    q: "Is ToolVerse completely free?",
+    a: "Yes! ToolVerse is 100% free. There are no paywalls, no monthly subscription requirements, and no daily usage caps."
+  },
+  {
+    q: "Is my data secure?",
+    a: "Absolutely. All processing occurs 100% locally inside your web browser. Your inputs, documents, and credentials never upload to our servers."
+  },
+  {
+    q: "How do the AI Tools work?",
+    a: "AI tools run client-side using Google's official Gemini API. You can insert your own Gemini API key in the tools options or run in simulated mode."
+  },
+  {
+    q: "Are the conversion tools offline-friendly?",
+    a: "Yes! Since they load client-side in standard JavaScript web workers, you can continue using standard encoders and calculators even when offline."
+  }
+];
+---
+
+<Layout title="ToolVerse - 100+ Free Online Developer & AI Tools">
+  
+  <!-- Hero Section -->
+  <section class="py-16 sm:py-24 relative overflow-hidden">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      
+      <!-- Left Column: Content -->
+      <div class="text-left space-y-6">
+        <div class="hero-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/20 bg-primary/5 text-xs text-primary font-semibold animate-pulse-slow">
+          <Sparkles class="h-3.5 w-3.5" />
+          <span>100+ Free Browser Utilities & AI Assistants</span>
+        </div>
+        
+        <h1 class="hero-title text-4xl sm:text-6xl font-extrabold tracking-tight text-text-main leading-tight">
+          Developer Utilities. <br />
+          <span class="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Free. Local. Instant.</span>
+        </h1>
+        
+        <p class="hero-desc text-xs sm:text-sm text-text-muted max-w-xl leading-relaxed">
+          JSON formatters, regex analyzers, image compressors, password checkers, and Gemini-powered code creators. 100% secure, private, and local.
+        </p>
+
+        <!-- Big Search Trigger Box -->
+        <div class="hero-search max-w-xl">
+          <button 
+            onclick="document.getElementById('search-trigger')?.click()"
+            class="w-full flex items-center justify-between p-4 rounded-2xl glass-card border border-border-card text-text-muted hover:border-primary/50 text-xs sm:text-sm text-left cursor-pointer transition-all duration-300"
+          >
+            <span class="flex items-center gap-3">
+              <Search class="h-5 w-5 text-primary" />
+              <span>Search 100+ tools... (Press Ctrl + K)</span>
+            </span>
+            <span class="px-2 py-0.5 rounded-lg border border-border-card bg-bg-card font-mono text-xs hidden sm:inline">Ctrl K</span>
+          </button>
+        </div>
+
+        <!-- Buttons Stack / CTAs -->
+        <div class="hero-cta-btns flex flex-wrap gap-3.5 pt-2">
+          <button 
+            onclick="document.getElementById('search-trigger')?.click()"
+            class="tool-btn tool-btn-primary py-2.5 px-6 text-xs flex items-center gap-1.5"
+          >
+            Get Started <ArrowRight class="h-4 w-4" />
+          </button>
+          <a href="/docs" class="tool-btn tool-btn-secondary py-2.5 px-6 text-xs font-bold rounded-xl">
+            Read Docs
+          </a>
+        </div>
+      </div>
+
+      <!-- Right Column: JSON Formatter Preview -->
+      <div class="hero-preview hidden lg:block">
+        <div class="glass-panel p-6 rounded-3xl border border-border-card text-left font-mono text-xs shadow-2xl relative overflow-hidden h-[320px] bg-bg-card/50">
+          <div class="flex items-center justify-between border-b border-border-card pb-3 mb-4">
+            <div class="flex gap-1.5">
+              <span class="w-3 h-3 rounded-full bg-red-500/80"></span>
+              <span class="w-3 h-3 rounded-full bg-yellow-500/80"></span>
+              <span class="w-3 h-3 rounded-full bg-green-500/80"></span>
+            </div>
+            <span class="text-[10px] text-text-muted">json-formatter.json</span>
+          </div>
+          <pre class="text-text-muted overflow-auto h-[220px] leading-relaxed"><code>&#123;
+  <span class="text-primary">"status"</span>: <span class="text-accent">"success"</span>,
+  <span class="text-primary">"platform"</span>: <span class="text-accent">"ToolVerse"</span>,
+  <span class="text-primary">"features"</span>: [
+    <span class="text-emerald-500">"100+ Utilities"</span>,
+    <span class="text-emerald-500">"Gemini AI Helpers"</span>,
+    <span class="text-emerald-500">"Client-Side Workers"</span>
+  ],
+  <span class="text-primary">"security"</span>: &#123;
+    <span class="text-primary">"localOnly"</span>: <span class="text-accent">true</span>,
+    <span class="text-primary">"gdpr"</span>: <span class="text-accent">"Compliant"</span>
+  &#125;
+&#125;</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Features -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-20 max-w-4xl mx-auto">
+      <div class="quick-feature flex flex-col items-center p-4">
+        <div class="h-10 w-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-3">
+          <ShieldCheck class="h-5 w-5" />
+        </div>
+        <h3 class="text-xs font-semibold text-text-main">100% Secure & Local</h3>
+        <p class="text-[10px] text-text-muted mt-1">Data stays in your browser</p>
+      </div>
+      
+      <div class="quick-feature flex flex-col items-center p-4">
+        <div class="h-10 w-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-3">
+          <Zap class="h-5 w-5" />
+        </div>
+        <h3 class="text-xs font-semibold text-text-main">Instant Performance</h3>
+        <p class="text-[10px] text-text-muted mt-1">Zero server queues</p>
+      </div>
+
+      <div class="quick-feature flex flex-col items-center p-4">
+        <div class="h-10 w-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-3">
+          <Sparkles class="h-5 w-5" />
+        </div>
+        <h3 class="text-xs font-semibold text-text-main">Gemini AI Integrated</h3>
+        <p class="text-[10px] text-text-muted mt-1">Automated code generation</p>
+      </div>
+
+      <div class="quick-feature flex flex-col items-center p-4">
+        <div class="h-10 w-10 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent mb-3">
+          <Laptop class="h-5 w-5" />
+        </div>
+        <h3 class="text-xs font-semibold text-text-main">PWA Offline Mode</h3>
+        <p class="text-[10px] text-text-muted mt-1">Run anywhere, offline</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trending Tools Section (Desktop: 4 Cards, Tablet: 2 Cards, Mobile: 1 Card) -->
+  <section class="py-16 border-t border-border-card reveal-up">
+    <div class="flex justify-between items-end mb-8">
+      <div>
+        <h2 class="text-xl sm:text-2xl font-bold text-text-main">Trending Utilities</h2>
+        <p class="text-xs text-text-muted mt-1">Most frequently used utilities by developers.</p>
+      </div>
+      <a href="/categories" class="text-xs font-semibold text-primary flex items-center gap-1 hover:underline">
+        All Categories <ArrowRight class="h-3 w-3" />
+      </a>
+    </div>
+    
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 popular-grid">
+      {trendingTools.map(t => (
+        <div class="tilt-card h-full">
+          <ToolCard 
+            id={t.id}
+            name={t.name}
+            description={t.description}
+            category={t.category}
+            icon={t.icon}
+          />
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Categories Grid Section (Desktop: 6 Cards, Tablet: 3 Cards, Mobile: 2 Cards) -->
+  <section class="py-16 border-t border-border-card reveal-up">
+    <div class="text-center max-w-3xl mx-auto mb-12">
+      <h2 class="text-2xl sm:text-3xl font-bold text-text-main">Browse by Category</h2>
+      <p class="text-xs text-text-muted mt-2">Explore targeted subsets of developer tools, converter formatters, and AI assistants.</p>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5 categories-grid">
+      {categoryCounts.map(cat => (
+        <a 
+          href={`/categories/${cat.id}`}
+          class="glass-card p-5 rounded-2xl flex flex-col justify-between hover:border-primary/50 transition-all duration-300 relative group"
+        >
+          <div class="h-9 w-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary group-hover:scale-105 transition-transform duration-300 mb-4">
+            <DynamicIcon name={cat.icon} class="h-4.5 w-4.5" />
+          </div>
+          <div>
+            <div class="flex items-center justify-between gap-1">
+              <h3 class="text-xs font-bold text-text-main truncate">{cat.name}</h3>
+              <span class="px-1.5 py-0.5 rounded-md bg-border-card text-[9px] font-bold text-text-muted group-hover:bg-primary/20 group-hover:text-primary transition-all duration-200">
+                {cat.count}
+              </span>
+            </div>
+            <p class="text-[10px] text-text-muted mt-1.5 leading-relaxed line-clamp-2">{cat.desc}</p>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- Statistics Banner with Counter Animation -->
+  <section class="py-16 border-t border-border-card reveal-up">
+    <div class="glass-panel p-8 rounded-3xl grid grid-cols-1 sm:grid-cols-3 gap-8 text-center relative overflow-hidden bg-bg-card/45">
+      <div>
+        <div class="text-4xl font-extrabold text-primary" id="stat-tools" data-val="100">0+</div>
+        <div class="text-xs text-text-muted mt-1.5 font-medium uppercase tracking-wider">Production Tools</div>
+      </div>
+      <div class="border-y sm:border-y-0 sm:border-x border-border-card py-6 sm:py-0">
+        <div class="text-4xl font-extrabold text-accent" id="stat-local" data-val="100">0%</div>
+        <div class="text-xs text-text-muted mt-1.5 font-medium uppercase tracking-wider">Browser Processed</div>
+      </div>
+      <div>
+        <div class="text-4xl font-extrabold text-text-main" id="stat-logs" data-val="0">0</div>
+        <div class="text-xs text-text-muted mt-1.5 font-medium uppercase tracking-wider">Data Server Logs</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section with GSAP Accordion -->
+  <section class="py-16 border-t border-border-card reveal-up">
+    <div class="text-center max-w-2xl mx-auto mb-12">
+      <h2 class="text-2xl sm:text-3xl font-bold text-text-main">Frequently Asked Questions</h2>
+      <p class="text-xs text-text-muted mt-2">Everything you need to know about ToolVerse, privacy, and operations.</p>
+    </div>
+
+    <div class="max-w-2xl mx-auto space-y-4">
+      {faqs.map(faq => (
+        <div class="faq-item glass-card p-5 rounded-2xl border border-border-card cursor-pointer group transition-all duration-300">
+          <div class="flex justify-between items-center">
+            <h3 class="text-xs sm:text-sm font-bold text-text-main group-hover:text-primary transition-colors flex items-center gap-2">
+              <HelpCircle class="h-4.5 w-4.5 text-primary shrink-0" />
+              {faq.q}
+            </h3>
+            <span class="text-text-muted font-bold text-xs transform group-hover:scale-110 transition-transform duration-200" id="faq-chevron">+</span>
+          </div>
+          <div class="faq-answer h-0 overflow-hidden text-xs text-text-muted leading-relaxed">
+            <p class="pt-3.5 border-t border-border-card/50 mt-3">{faq.a}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- CTA Section with Reveal Effect -->
+  <section class="py-16 border-t border-border-card reveal-up">
+    <div id="cta-card" class="glass-panel p-8 sm:p-12 rounded-3xl max-w-4xl mx-auto relative overflow-hidden bg-gradient-to-r from-primary/10 via-transparent to-accent/10">
+      <h2 class="text-2xl sm:text-3xl font-bold text-text-main">Speed up your workflow today</h2>
+      <p class="text-xs text-text-muted mt-4 max-w-lg mx-auto leading-relaxed">
+        Join millions of developers using ToolVerse as their core browser utility platform. Completely open-source and customizable.
+      </p>
+      <div class="mt-8 flex flex-wrap gap-4 justify-center">
+        <button 
+          onclick="document.getElementById('search-trigger')?.click()"
+          class="tool-btn tool-btn-primary py-2.5 px-6 text-xs flex items-center gap-1.5"
+        >
+          Get Started <ArrowRight class="h-4 w-4" />
+        </button>
+        <a href="/docs" class="tool-btn tool-btn-secondary py-2.5 px-6 text-xs font-bold rounded-xl">
+          Read Docs
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // @ts-ignore
+      if (typeof gsap === 'undefined') return;
+
+      // 1. Hero Entrance Timeline
+      // @ts-ignore
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+      tl.fromTo(".hero-badge", { y: 25, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6 })
+        .fromTo(".hero-title", { y: 35, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8 }, "-=0.4")
+        .fromTo(".hero-desc", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8 }, "-=0.6")
+        .fromTo(".hero-search", { scale: 0.95, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.6 }, "-=0.6")
+        .fromTo(".hero-cta-btns", { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6 }, "-=0.4")
+        .fromTo(".hero-preview", { x: 45, opacity: 0 }, { x: 0, opacity: 1, duration: 0.8 }, "-=0.8")
+        .fromTo(".quick-feature", { y: 25, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.1, duration: 0.6 }, "-=0.5");
+
+      // 2. Stagger Entrance for Popular Tools
+      // @ts-ignore
+      gsap.from(".popular-grid > div", {
+        y: 40,
+        opacity: 0,
+        stagger: 0.12,
+        duration: 0.8,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: ".popular-grid",
+          start: "top 80%"
+        }
+      });
+
+      // 3. Stagger Entrance for Categories
+      // @ts-ignore
+      gsap.from(".categories-grid > a", {
+        y: 35,
+        opacity: 0,
+        stagger: 0.08,
+        duration: 0.8,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: ".categories-grid",
+          start: "top 85%"
+        }
+      });
+
+      // 4. Statistics Counters
+      const countStat = (id: string, targetVal: number, suffix: string) => {
+        const el = document.getElementById(id);
+        if (el) {
+          const obj = { val: 0 };
+          // @ts-ignore
+          gsap.to(obj, {
+            val: targetVal,
+            duration: 1.5,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: el,
+              start: "top 90%"
+            },
+            onUpdate: () => {
+              el.textContent = Math.floor(obj.val) + suffix;
+            }
+          });
+        }
+      };
+      countStat("stat-tools", 100, "+");
+      countStat("stat-local", 100, "%");
+      countStat("stat-logs", 0, "");
+
+      // 5. FAQ Accordion Action using GSAP height transition
+      document.querySelectorAll('.faq-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const answer = item.querySelector('.faq-answer');
+          const chevron = item.querySelector('#faq-chevron');
+          const isOpen = item.classList.contains('active');
+          
+          // Close others
+          document.querySelectorAll('.faq-item').forEach(otherItem => {
+            if (otherItem !== item && otherItem.classList.contains('active')) {
+              otherItem.classList.remove('active');
+              // @ts-ignore
+              gsap.to(otherItem.querySelector('.faq-answer'), { height: 0, duration: 0.3, ease: "power3.out" });
+              const otherChevron = otherItem.querySelector('#faq-chevron');
+              if (otherChevron) otherChevron.textContent = '+';
+            }
+          });
+          
+          if (isOpen) {
+            item.classList.remove('active');
+            // @ts-ignore
+            gsap.to(answer, { height: 0, duration: 0.3, ease: "power3.out" });
+            if (chevron) chevron.textContent = '+';
+          } else {
+            item.classList.add('active');
+            // @ts-ignore
+            gsap.to(answer, { height: "auto", duration: 0.3, ease: "power3.out" });
+            if (chevron) chevron.textContent = '-';
+          }
+        });
+      });
+    });
+  </script>
+</Layout>

@@ -1,0 +1,18 @@
+---
+import * as Icons from '@lucide/astro';
+
+interface Props {
+  name: string;
+  class?: string;
+}
+
+const { name, class: className = "h-5 w-5" } = Astro.props;
+
+// Fallback to Wrench icon if not found
+let IconComponent = Icons.Wrench;
+
+if (name in Icons) {
+  IconComponent = (Icons as any)[name];
+}
+---
+<IconComponent class={className} />

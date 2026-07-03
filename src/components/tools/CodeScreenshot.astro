@@ -1,0 +1,200 @@
+---
+import { Camera, Download, Sliders } from '@lucide/astro';
+---
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <!-- Controls Panel -->
+  <div class="glass-card p-5 rounded-2xl space-y-4 h-fit">
+    <h3 class="text-sm font-bold uppercase tracking-wider text-text-main border-b border-border-card pb-2">
+      Visual Options
+    </h3>
+    
+    <div>
+      <label class="tool-label text-xs">Background Theme</label>
+      <select id="screenshot-bg-select" class="w-full p-2.5 rounded-xl border border-border-card bg-bg-main/30 text-xs text-text-main focus:outline-none">
+        <option value="sunset">Sunset Glow (Orange/Red)</option>
+        <option value="ocean">Ocean Breeze (Blue/Teal)</option>
+        <option value="neon">Neon Purple (Violet/Indigo)</option>
+        <option value="cyberpunk">Cyberpunk (Yellow/Magenta)</option>
+        <option value="dark">Sleek Dark (Carbon Slate)</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="tool-label text-xs">Padding Options</label>
+      <input type="range" id="screenshot-padding-input" min="16" max="96" value="48" class="w-full accent-primary" />
+    </div>
+
+    <div>
+      <label class="tool-label text-xs">Window Theme</label>
+      <select id="screenshot-window-select" class="w-full p-2.5 rounded-xl border border-border-card bg-bg-main/30 text-xs text-text-main focus:outline-none">
+        <option value="mac-dark">macOS Window (Dark Mode)</option>
+        <option value="mac-light">macOS Window (Light Mode)</option>
+        <option value="minimal">Minimal Frame</option>
+      </select>
+    </div>
+
+    <button id="screenshot-download-btn" class="w-full tool-btn tool-btn-primary py-2.5 text-xs flex items-center justify-center gap-1.5 mt-6">
+      <Download class="h-4 w-4" /> Download PNG Screenshot
+    </button>
+  </div>
+
+  <!-- Interactive Sandbox & Canvas Preview -->
+  <div class="lg:col-span-2 space-y-4">
+    <!-- Visual Editor Area -->
+    <div class="glass-card p-4 rounded-2xl">
+      <h3 class="text-sm font-bold text-text-main uppercase tracking-wider pb-2 border-b border-border-card mb-4">
+        Interactive Preview Editor
+      </h3>
+      
+      <!-- Preview Wrapper -->
+      <div 
+        id="screenshot-preview-wrapper"
+        class="rounded-xl overflow-hidden flex items-center justify-center transition-all duration-300 min-h-[300px]"
+        style="background: linear-gradient(to right, #ff7e5f, #feb47b); padding: 48px;"
+      >
+        <!-- Mock macOS window -->
+        <div 
+          id="mock-window"
+          class="w-full max-w-lg rounded-xl shadow-2xl bg-zinc-900 border border-zinc-800 p-4 font-mono text-xs flex flex-col gap-3"
+        >
+          <!-- Title bar -->
+          <div class="flex items-center justify-between">
+            <div class="flex gap-1.5">
+              <span class="h-3 w-3 rounded-full bg-[#ff5f56]"></span>
+              <span class="h-3 w-3 rounded-full bg-[#ffbd2e]"></span>
+              <span class="h-3 w-3 rounded-full bg-[#27c93f]"></span>
+            </div>
+            <span class="text-[10px] text-zinc-500 font-semibold select-none">untitled.ts</span>
+          </div>
+          <!-- Editable Code block -->
+          <textarea 
+            id="screenshot-code-textarea"
+            rows="6"
+            class="w-full bg-transparent border-none text-zinc-200 focus:outline-none resize-none font-mono text-xs leading-relaxed"
+          ></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden Canvas used for generating export image -->
+    <canvas id="screenshot-export-canvas" class="hidden"></canvas>
+  </div>
+</div>
+
+<script>
+  const bgSelect = document.getElementById('screenshot-bg-select') as HTMLSelectElement;
+  const paddingInput = document.getElementById('screenshot-padding-input') as HTMLInputElement;
+  const windowSelect = document.getElementById('screenshot-window-select') as HTMLSelectElement;
+  const downloadBtn = document.getElementById('screenshot-download-btn');
+  const codeArea = document.getElementById('screenshot-code-textarea') as HTMLTextAreaElement;
+  
+  const previewWrapper = document.getElementById('screenshot-preview-wrapper');
+  const mockWindow = document.getElementById('mock-window');
+  const canvas = document.getElementById('screenshot-export-canvas') as HTMLCanvasElement;
+
+  // Set default code client-side to prevent Astro template literal errors
+  if (codeArea) {
+    codeArea.value = `const greet = (name: string) => {\n  console.log(\`Hello, \${name}!\`);\n};\n\ngreet("ToolVerse");`;
+  }
+
+  const themes: any = {
+    sunset: 'linear-gradient(to right, #ff7e5f, #feb47b)',
+    ocean: 'linear-gradient(to right, #00c6ff, #0072ff)',
+    neon: 'linear-gradient(to right, #7f00ff, #e100ff)',
+    cyberpunk: 'linear-gradient(to right, #ffe259, #ffa751)',
+    dark: 'linear-gradient(to right, #232526, #414345)'
+  };
+
+  const updateStyles = () => {
+    if (previewWrapper && bgSelect && paddingInput && mockWindow && windowSelect) {
+      previewWrapper.style.background = themes[bgSelect.value];
+      previewWrapper.style.padding = `${paddingInput.value}px`;
+      
+      const wTheme = windowSelect.value;
+      if (wTheme === 'mac-light') {
+        mockWindow.className = 'w-full max-w-lg rounded-xl shadow-2xl bg-white border border-zinc-200 p-4 font-mono text-xs flex flex-col gap-3';
+        codeArea.className = 'w-full bg-transparent border-none text-zinc-800 focus:outline-none resize-none font-mono text-xs leading-relaxed';
+      } else if (wTheme === 'mac-dark') {
+        mockWindow.className = 'w-full max-w-lg rounded-xl shadow-2xl bg-zinc-900 border border-zinc-800 p-4 font-mono text-xs flex flex-col gap-3';
+        codeArea.className = 'w-full bg-transparent border-none text-zinc-200 focus:outline-none resize-none font-mono text-xs leading-relaxed';
+      } else {
+        mockWindow.className = 'w-full max-w-lg rounded-lg shadow-xl bg-black/60 border border-white/10 p-4 font-mono text-xs flex flex-col gap-3';
+        codeArea.className = 'w-full bg-transparent border-none text-zinc-100 focus:outline-none resize-none font-mono text-xs leading-relaxed';
+      }
+    }
+  };
+
+  bgSelect.addEventListener('change', updateStyles);
+  paddingInput.addEventListener('input', updateStyles);
+  windowSelect.addEventListener('change', updateStyles);
+
+  downloadBtn?.addEventListener('click', () => {
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Build image sizes based on preview sizing
+    const padding = parseInt(paddingInput.value) * 1.5;
+    const fontHeight = 20;
+    const lines = codeArea.value.split('\n');
+    
+    // Window width and height
+    const wWidth = 600;
+    const wHeight = 100 + (lines.length * fontHeight);
+    
+    canvas.width = wWidth + (padding * 2);
+    canvas.height = wHeight + (padding * 2);
+
+    // Draw background gradient
+    const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    if (bgSelect.value === 'sunset') { grad.addColorStop(0, '#ff7e5f'); grad.addColorStop(1, '#feb47b'); }
+    else if (bgSelect.value === 'ocean') { grad.addColorStop(0, '#00c6ff'); grad.addColorStop(1, '#0072ff'); }
+    else if (bgSelect.value === 'neon') { grad.addColorStop(0, '#7f00ff'); grad.addColorStop(1, '#e100ff'); }
+    else if (bgSelect.value === 'cyberpunk') { grad.addColorStop(0, '#ffe259'); grad.addColorStop(1, '#ffa751'); }
+    else { grad.addColorStop(0, '#232526'); grad.addColorStop(1, '#414345'); }
+
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw window backing
+    ctx.shadowColor = 'rgba(0,0,0,0.4)';
+    ctx.shadowBlur = 40;
+    ctx.fillStyle = windowSelect.value === 'mac-light' ? '#ffffff' : '#18181b';
+    ctx.roundRect ? ctx.roundRect(padding, padding, wWidth, wHeight, 12) : ctx.fillRect(padding, padding, wWidth, wHeight);
+    ctx.fill();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+
+    // Draw macOS circles
+    const isLight = windowSelect.value === 'mac-light';
+    ctx.fillStyle = '#ff5f56'; ctx.beginPath(); ctx.arc(padding + 20, padding + 22, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ffbd2e'; ctx.beginPath(); ctx.arc(padding + 38, padding + 22, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#27c93f'; ctx.beginPath(); ctx.arc(padding + 56, padding + 22, 6, 0, Math.PI * 2); ctx.fill();
+
+    // Title text
+    ctx.fillStyle = isLight ? '#71717a' : '#52525b';
+    ctx.font = 'bold 11px monospace';
+    ctx.fillText('untitled.ts', padding + wWidth/2 - 30, padding + 26);
+
+    // Draw Code Lines
+    ctx.fillStyle = isLight ? '#18181b' : '#f4f4f5';
+    ctx.font = '13px monospace';
+    lines.forEach((line, index) => {
+      ctx.fillText(line, padding + 20, padding + 64 + (index * fontHeight));
+    });
+
+    // Trigger download
+    const link = document.createElement('a');
+    link.download = 'toolverse-code-screenshot.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    
+    // @ts-ignore
+    window.showToast?.('Screenshot downloaded!', 'success');
+  });
+
+  // Initial trigger
+  updateStyles();
+</script>

@@ -1,0 +1,207 @@
+---
+import { Play, Pause, RotateCcw, Volume2, Timer, Award } from '@lucide/astro';
+
+interface Props {
+  id: string;
+}
+
+const { id } = Astro.props;
+---
+
+<div class="glass-card p-6 sm:p-8 rounded-3xl max-w-xl mx-auto flex flex-col items-center justify-between text-center relative overflow-hidden">
+  <!-- Glowing Background Ring -->
+  <div class="absolute inset-0 bg-gradient-to-tr from-primary/5 to-accent/5 -z-10"></div>
+  
+  <!-- Header details -->
+  <div class="mb-4">
+    <h3 class="text-sm font-bold uppercase tracking-wider text-primary flex items-center gap-1.5 justify-center">
+      <Timer class="h-4.5 w-4.5" />
+      {id === 'pomodoro-timer' && 'Focus Pomodoro'}
+      {id === 'stopwatch' && 'Stopwatch Tracker'}
+      {id === 'countdown-timer' && 'Countdown Timer'}
+    </h3>
+    <p class="text-xs text-text-muted mt-1">Keep track of your sprints and intervals locally.</p>
+  </div>
+
+  <!-- Big Clock Display -->
+  <div class="my-8 relative">
+    <div class="text-5xl sm:text-7xl font-extrabold text-text-main font-mono tracking-wider select-none" id="timer-display-clock">
+      {id === 'pomodoro-timer' && '25:00'}
+      {id === 'stopwatch' && '00:00.00'}
+      {id === 'countdown-timer' && '00:10:00'}
+    </div>
+  </div>
+
+  <!-- Input setters (For countdown timer only) -->
+  {id === 'countdown-timer' && (
+    <div class="flex gap-2 items-center mb-6" id="countdown-setters">
+      <input type="number" id="cd-hours" min="0" max="23" value="0" placeholder="HH" class="w-14 p-2 rounded-lg border border-border-card bg-bg-main/30 text-center font-mono text-xs focus:outline-none" />
+      <span class="text-xs font-bold text-text-muted">:</span>
+      <input type="number" id="cd-mins" min="0" max="59" value="10" placeholder="MM" class="w-14 p-2 rounded-lg border border-border-card bg-bg-main/30 text-center font-mono text-xs focus:outline-none" />
+      <span class="text-xs font-bold text-text-muted">:</span>
+      <input type="number" id="cd-secs" min="0" max="59" value="0" placeholder="SS" class="w-14 p-2 rounded-lg border border-border-card bg-bg-main/30 text-center font-mono text-xs focus:outline-none" />
+    </div>
+  )}
+
+  <!-- Controls buttons Row -->
+  <div class="flex gap-3">
+    <button id="timer-toggle-btn" class="tool-btn tool-btn-primary py-2 px-5 text-xs flex items-center gap-1">
+      <Play class="h-3.5 w-3.5 fill-white" /> Start
+    </button>
+    <button id="timer-reset-btn" class="tool-btn tool-btn-secondary py-2 px-5 text-xs flex items-center gap-1">
+      <RotateCcw class="h-3.5 w-3.5" /> Reset
+    </button>
+  </div>
+
+  <!-- Splits/Laps display (Stopwatch only) -->
+  {id === 'stopwatch' && (
+    <div class="w-full mt-6 border-t border-border-card pt-4 text-left">
+      <div class="flex justify-between items-center mb-2">
+        <h4 class="text-xs font-bold text-text-main">Lap Splits</h4>
+        <button id="stopwatch-lap-btn" class="tool-btn tool-btn-secondary py-1 px-3 text-[10px]">Lap Split</button>
+      </div>
+      <ul id="stopwatch-laps-list" class="max-h-32 overflow-y-auto space-y-1.5 text-xs text-text-muted font-mono">
+        <!-- Laps will append here -->
+      </ul>
+    </div>
+  )}
+</div>
+
+<script define:vars={{ timerId: id }}>
+  const displayClock = document.getElementById('timer-display-clock');
+  const toggleBtn = document.getElementById('timer-toggle-btn');
+  const resetBtn = document.getElementById('timer-reset-btn');
+  
+  // Stopwatch Lap references
+  const lapBtn = document.getElementById('stopwatch-lap-btn');
+  const lapsList = document.getElementById('stopwatch-laps-list');
+
+  let intervalId = null;
+  let isRunning = false;
+  
+  // States
+  let pomodoroTimeLeft = 25 * 60; // 25 minutes
+  let stopwatchMs = 0;
+  let countdownSeconds = 10 * 60; // 10 minutes
+
+  const formatPomodoroTime = (seconds) => {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
+
+  const formatStopwatchTime = (ms) => {
+    const totalSecs = Math.floor(ms / 1000);
+    const m = Math.floor(totalSecs / 60).toString().padStart(2, '0');
+    const s = (totalSecs % 60).toString().padStart(2, '0');
+    const hundredths = Math.floor((ms % 1000) / 10).toString().padStart(2, '0');
+    return `${m}:${s}.${hundredths}`;
+  };
+
+  const formatCountdownTime = (seconds) => {
+    const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+    const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${h}:${m}:${s}`;
+  };
+
+  const alertSound = () => {
+    // Client-side Web Audio API synthesizer beep to prevent requiring static file assets!
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.frequency.value = 520;
+      gain.gain.setValueAtTime(1, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.2);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 1.2);
+    } catch (e) {}
+  };
+
+  const handleStart = () => {
+    isRunning = true;
+    toggleBtn.innerHTML = `<svg class="h-3.5 w-3.5 fill-white" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg> Pause`;
+
+    if (timerId === 'pomodoro-timer') {
+      intervalId = setInterval(() => {
+        if (pomodoroTimeLeft > 0) {
+          pomodoroTimeLeft--;
+          displayClock.textContent = formatPomodoroTime(pomodoroTimeLeft);
+        } else {
+          alertSound();
+          handleReset();
+          window.showToast?.('Time to take a break!', 'success');
+        }
+      }, 1000);
+    } else if (timerId === 'stopwatch') {
+      const startTime = Date.now() - stopwatchMs;
+      intervalId = setInterval(() => {
+        stopwatchMs = Date.now() - startTime;
+        displayClock.textContent = formatStopwatchTime(stopwatchMs);
+      }, 10);
+    } else if (timerId === 'countdown-timer') {
+      // Fetch setters
+      const hInput = document.getElementById('cd-hours');
+      const mInput = document.getElementById('cd-mins');
+      const sInput = document.getElementById('cd-secs');
+
+      if (hInput && mInput && sInput && stopwatchMs === 0) {
+        countdownSeconds = (parseInt(hInput.value) || 0) * 3600 +
+                           (parseInt(mInput.value) || 0) * 60 +
+                           (parseInt(sInput.value) || 0);
+      }
+
+      intervalId = setInterval(() => {
+        if (countdownSeconds > 0) {
+          countdownSeconds--;
+          displayClock.textContent = formatCountdownTime(countdownSeconds);
+        } else {
+          alertSound();
+          handleReset();
+          window.showToast?.('Countdown finished!', 'success');
+        }
+      }, 1000);
+    }
+  };
+
+  const handlePause = () => {
+    isRunning = false;
+    toggleBtn.innerHTML = `<svg class="h-3.5 w-3.5 fill-white" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Start`;
+    if (intervalId) clearInterval(intervalId);
+  };
+
+  const handleReset = () => {
+    handlePause();
+    stopwatchMs = 0;
+    
+    if (timerId === 'pomodoro-timer') {
+      pomodoroTimeLeft = 25 * 60;
+      displayClock.textContent = '25:00';
+    } else if (timerId === 'stopwatch') {
+      displayClock.textContent = '00:00.00';
+      if (lapsList) lapsList.innerHTML = '';
+    } else if (timerId === 'countdown-timer') {
+      countdownSeconds = 10 * 60;
+      displayClock.textContent = '00:10:00';
+    }
+  };
+
+  toggleBtn?.addEventListener('click', () => {
+    if (isRunning) handlePause();
+    else handleStart();
+  });
+
+  resetBtn?.addEventListener('click', handleReset);
+
+  lapBtn?.addEventListener('click', () => {
+    if (isRunning && lapsList) {
+      const li = document.createElement('li');
+      li.className = 'flex justify-between border-b border-border-card pb-1';
+      li.innerHTML = `<span>Lap ${lapsList.children.length + 1}</span> <span>${formatStopwatchTime(stopwatchMs)}</span>`;
+      lapsList.appendChild(li);
+    }
+  });
+</script>

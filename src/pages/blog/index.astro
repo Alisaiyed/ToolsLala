@@ -1,0 +1,107 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { Calendar, User, ArrowRight, BookOpen } from '@lucide/astro';
+
+const posts = [
+  {
+    slug: "why-we-built-offline-first",
+    title: "Why We Built an Offline-First, Zero-Server Developer Suite",
+    desc: "A deep dive into security-first client-side architectures. How we leverage browser-native sandboxing to process payloads without database logs.",
+    date: "July 2, 2026",
+    author: "Jane Doe",
+    readTime: "5 min read",
+    tag: "Security"
+  },
+  {
+    slug: "optimizing-client-side-image-compression",
+    title: "Optimizing Client-Side Image Compression with Canvas and Web Workers",
+    desc: "Learn how we handle MB-sized JPEG/PNG compression and real-time scaling within milliseconds directly inside browser UI thread boundaries.",
+    date: "June 28, 2026",
+    author: "Bob Stone",
+    readTime: "7 min read",
+    tag: "Performance"
+  },
+  {
+    slug: "running-gemini-ai-models-directly",
+    title: "Running Gemini AI Models Directly in Client-Side JavaScript Apps",
+    desc: "How developers can safely integrate Google's official Gemini API client side, manage credentials transiently, and leverage simulated mock fallbacks.",
+    date: "June 15, 2026",
+    author: "Jane Doe",
+    readTime: "4 min read",
+    tag: "AI Coding"
+  }
+];
+---
+
+<Layout 
+  title="Blog - Toolsbawa Insights"
+  description="Read technical guides, security articles, and performance updates from the core engineering team behind Toolsbawa."
+>
+  <div class="space-y-12">
+    <!-- Header -->
+    <div class="text-center py-6">
+      <h1 class="text-3xl font-extrabold text-text-main">Toolsbawa Engineering Blog</h1>
+      <p class="text-xs sm:text-sm text-text-muted mt-2">Technical articles on browser sandboxing, performance optimization, and AI models.</p>
+    </div>
+
+    <!-- Featured Post -->
+    <div class="glass-panel p-6 sm:p-8 rounded-3xl grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-gradient-to-r from-primary/5 via-transparent to-accent/5">
+      <div class="space-y-4">
+        <span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-primary/10 text-primary border border-primary/20">
+          Featured Article
+        </span>
+        <h2 class="text-xl sm:text-2xl font-bold text-text-main leading-tight">
+          {posts[0].title}
+        </h2>
+        <p class="text-xs sm:text-sm text-text-muted leading-relaxed">
+          {posts[0].desc}
+        </p>
+        <div class="flex items-center gap-4 text-xs text-text-muted pt-2">
+          <span class="flex items-center gap-1"><Calendar class="h-3.5 w-3.5" /> {posts[0].date}</span>
+          <span class="flex items-center gap-1"><User class="h-3.5 w-3.5" /> {posts[0].author}</span>
+        </div>
+        <a href={`/blog/${posts[0].slug}`} class="tool-btn tool-btn-primary py-2 px-4 text-xs flex items-center gap-1.5 mt-4 w-fit">
+          Read Article <ArrowRight class="h-3.5 w-3.5" />
+        </a>
+      </div>
+      
+      <!-- Mock graphic -->
+      <div class="h-48 sm:h-64 rounded-2xl border border-border-card bg-bg-card/50 flex flex-col justify-center items-center text-center p-6 relative overflow-hidden">
+        <div class="absolute inset-0 bg-grid opacity-[0.02]"></div>
+        <div class="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-3">
+          <BookOpen class="h-6 w-6" />
+        </div>
+        <h3 class="text-sm font-bold text-text-main">Client-Side Sandbox</h3>
+        <p class="text-[11px] text-text-muted mt-1 max-w-xs">Data never leaves your machine. Learn why it is the future of secure coding tools.</p>
+      </div>
+    </div>
+
+    <!-- Posts Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-border-card pt-12">
+      {posts.slice(1).map(post => (
+        <article class="glass-card p-6 rounded-2xl flex flex-col justify-between space-y-4">
+          <div class="space-y-2">
+            <span class="text-[10px] uppercase font-bold tracking-wider text-accent">{post.tag}</span>
+            <h3 class="text-base font-bold text-text-main hover:text-primary transition-colors cursor-pointer">
+              <a href={`/blog/${post.slug}`} class="hover:underline">
+                {post.title}
+              </a>
+            </h3>
+            <p class="text-xs text-text-muted leading-relaxed line-clamp-3">
+              {post.desc}
+            </p>
+          </div>
+
+          <div class="flex items-center justify-between text-[11px] text-text-muted border-t border-border-card pt-3 mt-4">
+            <div class="flex gap-3">
+              <span>{post.date}</span>
+              <span>•</span>
+              <span>{post.readTime}</span>
+            </div>
+            <a href={`/blog/${post.slug}`} class="text-primary font-semibold hover:underline">Read →</a>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</Layout>

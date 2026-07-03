@@ -1,0 +1,108 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { Calendar, User, ArrowLeft, BookOpen } from '@lucide/astro';
+
+export async function getStaticPaths() {
+  const posts = [
+    {
+      slug: "why-we-built-offline-first",
+      title: "Why We Built an Offline-First, Zero-Server Developer Suite",
+      desc: "A deep dive into security-first client-side architectures. How we leverage browser-native sandboxing to process payloads without database logs.",
+      date: "July 2, 2026",
+      author: "Jane Doe",
+      readTime: "5 min read",
+      tag: "Security",
+      content: `
+        <p class="mb-4">In modern software development, developer utility sites are ubiquitous. Whether it is formatting JSON, inspecting JWT headers, or generating UUIDs, we find ourselves utilizing these tools daily. However, a significant concern exists: where does our input data go?</p>
+        
+        <p class="mb-4">Many online formatters are simple wrappers around server-side endpoints. When you paste an API payload, a database connection string, or user credentials, that data leaves your workstation and travels across the public internet to a third-party server. In many cases, it is logged, cached, or persisted in application logs.</p>
+        
+        <h2 class="text-lg font-bold text-text-main mt-8 mb-4">The Privacy and Security Solution</h2>
+        <p class="mb-4">Toolsbawa is engineered with a strict <strong>offline-first, client-side execution model</strong>. When you use any tool on Toolsbawa, the code executes directly inside your browser engine. We utilize client-side Web Workers, HTML5 Canvas APIs, and local state management. There is no backend database, no submission queue, and no diagnostic logging for user payloads.</p>
+        
+        <h2 class="text-lg font-bold text-text-main mt-8 mb-4">How It Works Under the Hood</h2>
+        <p class="mb-4">1. <strong>JavaScript Web Workers:</strong> Long-running executions like minification, hashing, and regex checks run in separate worker threads, keeping the main interface fluid (60 FPS).</p>
+        <p class="mb-4">2. <strong>Wasm Compilation:</strong> Complex conversion libraries are compiled down to WebAssembly for native C++/Rust processing speeds directly within JavaScript.</p>
+        <p class="mb-4">3. <strong>LocalStorage Syncing:</strong> Preferences, favorites list, and dark/light mode configurations are read and written strictly to your browser's private Storage container.</p>
+      `
+    },
+    {
+      slug: "optimizing-client-side-image-compression",
+      title: "Optimizing Client-Side Image Compression with Canvas and Web Workers",
+      desc: "Learn how we handle MB-sized JPEG/PNG compression and real-time scaling within milliseconds directly inside browser UI thread boundaries.",
+      date: "June 28, 2026",
+      author: "Bob Stone",
+      readTime: "7 min read",
+      tag: "Performance",
+      content: `
+        <p class="mb-4">Images are the largest assets on the modern web. Reducing file size without compromising structural details is crucial for keeping site speeds high and page loads instant.</p>
+        
+        <p class="mb-4">Typically, image optimization is done via server-side software like ImageMagick or dedicated server processes. However, transferring 5MB+ raw files just to compress them is slow, expensive, and insecure. We decided to solve this by moving the entire process directly to the browser.</p>
+        
+        <h2 class="text-lg font-bold text-text-main mt-8 mb-4">Leveraging Canvas and File APIs</h2>
+        <p class="mb-4">Our client-side compression tool loads the raw image into memory using the browser's <code>FileReader</code> API. We construct a virtual HTML5 <code>&lt;canvas&gt;</code> element, scale the rendering matrix down to the requested quality, and export the binary blob as a low-weight file using <code>canvas.toBlob()</code>.</p>
+        
+        <h2 class="text-lg font-bold text-text-main mt-8 mb-4">Performance Metrics</h2>
+        <p class="mb-4">Using canvas-level pixel operations, we achieve over 70% size reductions on raw camera images in under 120ms. The interface remains active, with zero upload wait times or server billing overheads.</p>
+      `
+    },
+    {
+      slug: "running-gemini-ai-models-directly",
+      title: "Running Gemini AI Models Directly in Client-Side JavaScript Apps",
+      desc: "How developers can safely integrate Google's official Gemini API client side, manage credentials transiently, and leverage simulated mock fallbacks.",
+      date: "June 15, 2026",
+      author: "Jane Doe",
+      readTime: "4 min read",
+      tag: "AI Coding",
+      content: `
+        <p class="mb-4">AI assistance is transforming how developer tooling operates. From generating boilerplate SQL queries to explaining complex regex patterns, AI models add immense value.</p>
+        
+        <p class="mb-4">Instead of proxying AI requests through a central API server, Toolsbawa leverages direct-to-API communication. By allowing developers to securely input their own <strong>Gemini API Keys</strong>, we keep the service free, customizable, and limit-free.</p>
+        
+        <h2 class="text-lg font-bold text-text-main mt-8 mb-4">Securing the API Credentials</h2>
+        <p class="mb-4">The key is stored only inside your browser's local state. It never hits our servers. When a request is run, the SDK makes a direct HTTPS request to Google's official <code>generativelanguage.googleapis.com</code> endpoint. For developers without a key, we provide robust mock generators that simulate AI response states to keep testing seamless.</p>
+      `
+    }
+  ];
+
+  return posts.map(post => ({
+    params: { slug: post.slug },
+    props: { post }
+  }));
+}
+
+const { post } = Astro.props;
+---
+
+<Layout 
+  title={`${post.title} | Toolsbawa Blog`}
+  description={post.desc}
+>
+  <div class="mb-6">
+    <a href="/blog" class="inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-text-main transition-colors duration-200">
+      <ArrowLeft class="h-3.5 w-3.5" /> Back to Blog
+    </a>
+  </div>
+
+  <article class="max-w-3xl mx-auto space-y-6">
+    <div class="space-y-3">
+      <span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-primary/10 text-primary border border-primary/20 w-fit block">
+        {post.tag}
+      </span>
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-text-main leading-tight">
+        {post.title}
+      </h1>
+      
+      <div class="flex items-center gap-4 text-xs text-text-muted border-b border-border-card/50 pb-6 pt-2">
+        <span class="flex items-center gap-1"><Calendar class="h-3.5 w-3.5" /> {post.date}</span>
+        <span class="flex items-center gap-1"><User class="h-3.5 w-3.5" /> {post.author}</span>
+        <span>•</span>
+        <span>{post.readTime}</span>
+      </div>
+    </div>
+
+    <!-- Article Content -->
+    <div class="text-xs sm:text-sm text-text-muted leading-relaxed space-y-4 pt-4 prose dark:prose-invert max-w-none" set:html={post.content}>
+    </div>
+  </article>
+</Layout>

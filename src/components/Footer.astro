@@ -1,0 +1,105 @@
+---
+import { Sparkles } from '@lucide/astro';
+---
+
+<footer class="bg-zinc-950 border-t border-zinc-800 text-zinc-400 relative z-10 mt-auto py-16">
+  <!-- Sponsor Banner / Ad Space -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 border-b border-zinc-800">
+    <div class="glass-panel border-zinc-800/80 bg-zinc-900/50 p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="flex items-center gap-4">
+        <div class="bg-primary/10 p-3 rounded-xl text-primary animate-pulse-slow">
+          <Sparkles class="h-6 w-6" />
+        </div>
+        <div>
+          <h4 class="text-sm font-semibold text-zinc-100">Sponsor Toolsbawa Premium</h4>
+          <p class="text-xs text-zinc-400">Remove advertisements, support client-side worker updates, and access private APIs.</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 w-full md:w-auto justify-end">
+        <a href="/contact" class="tool-btn border-zinc-700 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 py-2 px-4 text-xs font-bold rounded-xl">
+          Learn More
+        </a>
+        <button class="tool-btn tool-btn-primary py-2 px-5 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer">
+          <svg class="h-4 w-4 fill-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg> Donate
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 grid grid-cols-1 md:grid-cols-4 gap-12">
+    <!-- Info -->
+    <div class="space-y-5">
+      <div class="flex items-center gap-2.5">
+        <div class="h-8 w-8 rounded-lg bg-primary flex items-center justify-center shadow-md shadow-primary/20">
+          <Sparkles class="h-4.5 w-4.5 text-white" />
+        </div>
+        <span class="text-lg font-bold text-zinc-100 tracking-tight">Toolsbawa</span>
+      </div>
+      <p class="text-xs text-zinc-400 leading-relaxed">
+        100+ free online developer utilities and Gemini AI assistants in a secure browser container. No data leaves your machine.
+      </p>
+      <div class="flex items-center gap-4">
+        <!-- Github Icon -->
+        <a href="https://github.com" class="text-zinc-500 hover:text-zinc-100 transition-colors duration-200" aria-label="GitHub">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linecap="round">
+            <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path>
+            <path d="M9 18c-4.51 2-5-2-7-2"></path>
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Quick Tools Links -->
+    <div>
+      <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-100 mb-5">Popular Categories</h3>
+      <ul class="space-y-3.5 text-xs">
+        <li><a href="/categories/ai-tools" class="hover:text-zinc-100 transition-colors">AI Tools</a></li>
+        <li><a href="/categories/developer-tools" class="hover:text-zinc-100 transition-colors">Developer Formatters</a></li>
+        <li><a href="/categories/json-tools" class="hover:text-zinc-100 transition-colors">JSON Validators</a></li>
+        <li><a href="/categories/security-tools" class="hover:text-zinc-100 transition-colors">Generators & Security</a></li>
+      </ul>
+    </div>
+
+    <!-- Company / Info -->
+    <div>
+      <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-100 mb-5">Resources</h3>
+      <ul class="space-y-3.5 text-xs">
+        <li><a href="/about" class="hover:text-zinc-100 transition-colors">About Us</a></li>
+        <li><a href="/blog" class="hover:text-zinc-100 transition-colors">Blog Articles</a></li>
+        <li><a href="/docs" class="hover:text-zinc-100 transition-colors">Documentation</a></li>
+        <li><a href="/contact" class="hover:text-zinc-100 transition-colors">Contact Support</a></li>
+      </ul>
+    </div>
+
+    <!-- Newsletter -->
+    <div class="space-y-4">
+      <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-100 mb-2">Stay Updated</h3>
+      <p class="text-xs text-zinc-400 leading-relaxed">Subscribe to receive releases summaries and monthly coding tips.</p>
+      <form class="flex gap-2" onsubmit="event.preventDefault(); alert('Subscribed successfully!');">
+        <input 
+          type="email" 
+          placeholder="your@email.com" 
+          required 
+          class="flex-1 px-3.5 py-2 text-xs rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-200 focus:outline-none focus:border-primary/50"
+        />
+        <button type="submit" class="tool-btn tool-btn-primary px-4 py-2 text-xs font-bold rounded-xl cursor-pointer">Join</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Copyright -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 border-t border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-6 text-xs text-zinc-500">
+    <div class="text-center sm:text-left space-y-1">
+      <div>© 2026 Toolsbawa</div>
+      <div>Designed & Developed ❤️ by <span class="text-zinc-300 font-medium">Saiyed Mohammad Ali</span></div>
+      <div>Built with Astro + Tailwind CSS</div>
+    </div>
+    <div class="flex items-center gap-6">
+      <a href="/privacy" class="hover:text-zinc-200 transition-colors">Privacy Policy</a>
+      <a href="/terms" class="hover:text-zinc-200 transition-colors">Terms of Service</a>
+      <a href="/disclaimer" class="hover:text-zinc-200 transition-colors">Disclaimer</a>
+    </div>
+  </div>
+</footer>

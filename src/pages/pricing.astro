@@ -1,0 +1,91 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { Check, Sparkles } from '@lucide/astro';
+---
+
+<Layout 
+  title="Pricing Plans - Toolsbawa"
+  description="Toolsbawa is 100% free and open-source. Learn how we keep the servers running and our licensing structures."
+>
+  <div class="max-w-5xl mx-auto space-y-12 py-6">
+    <!-- Header -->
+    <div class="text-center space-y-4">
+      <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-text-main">
+        Simple, Transparent Plans
+      </h1>
+      <p class="text-xs sm:text-sm text-text-muted max-w-lg mx-auto">
+        All developer utilities run local-only in your browser. Absolutely no credit card or account creation required.
+      </p>
+    </div>
+
+    <!-- Pricing Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 pt-6">
+      <!-- Free Plan -->
+      <div class="glass-card p-6 rounded-2xl flex flex-col justify-between border border-border-card bg-bg-card/30 relative">
+        <div class="space-y-4">
+          <div>
+            <h3 class="text-sm font-bold text-text-main">Community Free</h3>
+            <p class="text-[11px] text-text-muted mt-1">For student developers and hobbyists.</p>
+          </div>
+          <div class="text-3xl font-extrabold text-text-main">$0 <span class="text-xs font-normal text-text-muted">/ forever</span></div>
+          
+          <ul class="space-y-2.5 text-xs text-text-muted pt-4 border-t border-border-card/50">
+            <li class="flex items-center gap-2"><Check class="h-3.5 w-3.5 text-primary shrink-0" /> 100+ browser tools</li>
+            <li class="flex items-center gap-2"><Check class="h-3.5 w-3.5 text-primary shrink-0" /> 100% local processing</li>
+            <li class="flex items-center gap-2"><Check class="h-3.5 w-3.5 text-primary shrink-0" /> Custom Gemini API setup</li>
+            <li class="flex items-center gap-2"><Check class="h-3.5 w-3.5 text-primary shrink-0" /> Responsive mobile layouts</li>
+          </ul>
+        </div>
+        <button class="tool-btn tool-btn-secondary w-full py-2.5 mt-8 text-xs font-bold rounded-xl cursor-pointer">
+          Current Plan
+        </button>
+      </div>
+
+      <!-- Pro Plan (Highlighted) -->
+      <div class="glass-panel p-6 rounded-2xl flex flex-col justify-between border border-primary/40 bg-primary/5 relative">
+        <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-primary text-white text-[9px] uppercase tracking-wider font-extrabold px-3 py-1 rounded-full flex items-center gap-1 shadow-md shadow-primary/20">
+          <Sparkles class="h-3 w-3" /> Most Popular
+        </div>
+        <div class="space-y-4">
+          <div>
+            <h3 class="text-sm font-bold text-text-main">Developer Pro</h3>
+            <p class="text-[11px] text-text-muted mt-1">For professional full-stack engineers.</p>
+          </div>
+          <div class="text-3xl font-extrabold text-text-main">$9 <span class="text-xs font-normal text-text-muted">/ month</span></div>
+
+          <ul class="space-y-2.5 text-xs text-text-muted pt-4 border-t border-border-card/50">
+            <li class="flex items-center gap-2"><Check class="h-3.5 w-3.5 text-primary shrink-0" /> Everything in Free</li>
+            <li class="flex items-center gap-2"><Check class="h-3.5 w-3.5 text-primary shrink-0" /> Shared Gemini API endpoints</li>
+            <li class="flex items-center gap-2"><Check class="h-3.5 w-3.5 text-primary shrink-0" /> Custom team presets sync</li>
+            <li class="flex items-center gap-2"><Check class="h-3.5 w-3.5 text-primary shrink-0" /> High-speed offline workers</li>
+            <li class="flex items-center gap-2"><Check class="h-3.5 w-3.5 text-primary shrink-0" /> Priority discord assistance</li>
+          </ul>
+        </div>
+        <button class="tool-btn tool-btn-primary w-full py-2.5 mt-8 text-xs font-bold rounded-xl cursor-pointer" onclick="alert('Demo billing flow initiated!')">
+          Go Pro
+        </button>
+      </div>
+
+      <!-- Enterprise Plan -->
+      <div class="glass-card p-6 rounded-2xl flex flex-col justify-between border border-border-card bg-bg-card/30 relative">
+        <div class="space-y-4">
+          <div>
+            <h3 class="text-sm font-bold text-text-main">Enterprise</h3>
+            <p class="text-[11px] text-text-muted mt-1">For corporate teams and organizations.</p>
+          </div>
+          <div class="text-3xl font-extrabold text-text-main">$49 <span class="text-xs font-normal text-text-muted">/ month</span></div>
+
+          <ul class="space-y-2.5 text-xs text-text-muted pt-4 border-t border-border-card/50">
+            <li class="flex items-center gap-2"><Check class="h-3.5 w-3.5 text-primary shrink-0" /> Unlimited workspace users</li>
+            <li class="flex items-center gap-2"><Check class="h-3.5 w-3.5 text-primary shrink-0" /> Private self-hosted instances</li>
+            <li class="flex items-center gap-2"><Check class="h-3.5 w-3.5 text-primary shrink-0" /> SSO / SAML integration</li>
+            <li class="flex items-center gap-2"><Check class="h-3.5 w-3.5 text-primary shrink-0" /> 99.9% worker execution SLA</li>
+          </ul>
+        </div>
+        <a href="/contact" class="tool-btn tool-btn-secondary w-full py-2.5 mt-8 text-xs font-bold rounded-xl text-center">
+          Contact Sales
+        </a>
+      </div>
+    </div>
+  </div>
+</Layout>

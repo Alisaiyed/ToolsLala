@@ -1,0 +1,153 @@
+---
+import { Play, Copy, RefreshCw } from '@lucide/astro';
+---
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 h-[600px]">
+  <!-- Editors Panel -->
+  <div class="glass-card p-5 rounded-2xl flex flex-col justify-between h-full space-y-4">
+    <div class="flex items-center justify-between border-b border-border-card pb-2">
+      <h3 class="text-sm font-bold text-text-main uppercase tracking-wider">Source Editors</h3>
+      <div class="flex gap-2">
+        <button id="playground-run-btn" class="tool-btn tool-btn-primary py-1 px-3 text-xs flex items-center gap-1">
+          <Play class="h-3 w-3" /> Run Code
+        </button>
+        <button id="playground-clear-btn" class="tool-btn tool-btn-secondary py-1 px-3 text-xs flex items-center gap-1">
+          <RefreshCw class="h-3 w-3" /> Reset
+        </button>
+      </div>
+    </div>
+    
+    <!-- Code editors inputs -->
+    <div class="flex-grow space-y-3 overflow-y-auto">
+      <div>
+        <label class="tool-label text-xs">HTML Code</label>
+        <textarea 
+          id="playground-html" 
+          rows="5"
+          placeholder="<h1>Hello World</h1>"
+          class="w-full p-2.5 rounded-lg border border-border-card bg-bg-main/50 text-xs font-mono text-text-main focus:outline-none"
+        ></textarea>
+      </div>
+
+      <div>
+        <label class="tool-label text-xs">CSS Code</label>
+        <textarea 
+          id="playground-css" 
+          rows="4"
+          placeholder="body { background: #000; }"
+          class="w-full p-2.5 rounded-lg border border-border-card bg-bg-main/50 text-xs font-mono text-text-main focus:outline-none"
+        ></textarea>
+      </div>
+
+      <div>
+        <label class="tool-label text-xs">JavaScript</label>
+        <textarea 
+          id="playground-js" 
+          rows="3"
+          placeholder="console.log('hi');"
+          class="w-full p-2.5 rounded-lg border border-border-card bg-bg-main/50 text-xs font-mono text-text-main focus:outline-none"
+        ></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Live Output Panel -->
+  <div class="glass-card p-5 rounded-2xl flex flex-col h-full">
+    <h3 class="text-sm font-bold text-text-main uppercase tracking-wider border-b border-border-card pb-2 mb-4">
+      Live Interactive Preview
+    </h3>
+    <div class="flex-grow rounded-xl bg-white border border-border-card overflow-hidden relative">
+      <iframe 
+        id="playground-preview" 
+        sandbox="allow-scripts"
+        class="w-full h-full border-none bg-white"
+      ></iframe>
+    </div>
+  </div>
+</div>
+
+<script>
+  const htmlInput = document.getElementById('playground-html') as HTMLTextAreaElement;
+  const cssInput = document.getElementById('playground-css') as HTMLTextAreaElement;
+  const jsInput = document.getElementById('playground-js') as HTMLTextAreaElement;
+  const previewFrame = document.getElementById('playground-preview') as HTMLIFrameElement;
+  const runBtn = document.getElementById('playground-run-btn');
+  const resetBtn = document.getElementById('playground-clear-btn');
+
+  // Set default values inside client script to prevent Astro parser issues
+  const defaultHtml = `<div class="card">
+  <h1>Welcome to ToolVerse</h1>
+  <p>Edit HTML, CSS, and JS here to see live updates!</p>
+  <button onclick="celebrate()">Click Me</button>
+</div>`;
+
+  const defaultCss = `body {
+  font-family: system-ui, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 90vh;
+  margin: 0;
+  background: #0f172a;
+  color: #f8fafc;
+}
+.card {
+  text-align: center;
+  padding: 2.5rem;
+  border-radius: 1.5rem;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+button {
+  background: #6366f1;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}`;
+
+  const defaultJs = `function celebrate() {
+  alert("Awesome! The sandbox compiler works perfectly!");
+}`;
+
+  if (htmlInput) htmlInput.value = defaultHtml;
+  if (cssInput) cssInput.value = defaultCss;
+  if (jsInput) jsInput.value = defaultJs;
+
+  const updatePreview = () => {
+    const html = htmlInput?.value || '';
+    const css = cssInput?.value || '';
+    const js = jsInput?.value || '';
+
+    const combinedSource = `
+      <!doctype html>
+      <html>
+        <head>
+          <style>${css}</style>
+        </head>
+        <body>
+          ${html}
+          <script>${js}<\/script>
+        </body>
+      </html>
+    `;
+
+    if (previewFrame) {
+      previewFrame.srcdoc = combinedSource;
+    }
+  };
+
+  runBtn?.addEventListener('click', updatePreview);
+  resetBtn?.addEventListener('click', () => {
+    if (htmlInput) htmlInput.value = '<h1>My Custom Title</h1>';
+    if (cssInput) cssInput.value = 'h1 { color: #4f46e5; }';
+    if (jsInput) jsInput.value = '';
+    updatePreview();
+  });
+
+  // Initial trigger
+  updatePreview();
+</script>

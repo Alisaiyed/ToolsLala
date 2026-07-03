@@ -1,0 +1,217 @@
+---
+import { Sparkles, Search, Sun, Moon, Command } from '@lucide/astro';
+import { CATEGORIES } from '../data/tools';
+---
+
+<header class="sticky top-0 z-40 w-full bg-bg-main/40 backdrop-blur-xl border-b border-border-card transition-all duration-300">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <!-- Logo -->
+    <a href="/" class="flex items-center gap-2.5 group">
+      <div id="logo-icon-container" class="h-9 w-9 rounded-xl bg-gradient-to-tr from-primary to-accent flex items-center justify-center shadow-md shadow-primary/20 transition-all duration-300">
+        <Sparkles class="h-5 w-5 text-white" />
+      </div>
+      <span class="text-xl font-bold bg-gradient-to-r from-text-main to-text-main/80 bg-clip-text">Tool<span class="text-primary">sbawa</span></span>
+    </a>
+
+    <!-- Desktop Navigation -->
+    <nav class="hidden lg:flex items-center gap-5 text-xs font-semibold text-text-muted">
+      <a href="/" class="hover:text-text-main transition-colors duration-200">Home</a>
+      <a href="/tools" class="hover:text-text-main transition-colors duration-200">Tools</a>
+      
+      <!-- Categories Dropdown -->
+      <div class="relative group/nav py-4">
+        <button class="flex items-center gap-1 cursor-pointer hover:text-text-main transition-colors duration-200">
+          Categories
+        </button>
+        <div id="category-dropdown" class="absolute top-full left-0 mt-1 w-64 rounded-2xl glass-card border border-border-card p-2 hidden shadow-xl opacity-0 translate-y-2 z-50">
+          <div class="grid grid-cols-1 gap-0.5">
+            {CATEGORIES.slice(0, 8).map(c => (
+              <a href={`/categories/${c.id}`} class="block px-4 py-2 text-xs rounded-xl hover:bg-border-card text-text-muted hover:text-text-main transition-all duration-200">
+                {c.name}
+              </a>
+            ))}
+            <div class="border-t border-border-card my-1"></div>
+            <a href="/categories" class="block px-4 py-2 text-xs text-primary font-semibold hover:underline text-center">
+              View All Categories
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <a href="/categories/ai-tools" class="flex items-center gap-1 hover:text-text-main transition-colors duration-200">
+        <Sparkles class="h-3.5 w-3.5 text-primary animate-pulse-slow" />
+        AI Tools
+      </a>
+      <a href="/blog" class="hover:text-text-main transition-colors duration-200">Blog</a>
+      <a href="/pricing" class="hover:text-text-main transition-colors duration-200">Pricing</a>
+      <a href="/about" class="hover:text-text-main transition-colors duration-200">About</a>
+      <a href="/contact" class="hover:text-text-main transition-colors duration-200">Contact</a>
+      <a href="/tools?favorites=true" class="hover:text-text-main transition-colors duration-200">Favorites</a>
+      <a href="/login" class="hover:text-text-main transition-colors duration-200">Login</a>
+    </nav>
+
+    <!-- Header Actions -->
+    <div class="flex items-center gap-3">
+      <!-- Search Launcher -->
+      <button 
+        id="search-trigger"
+        class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border-card bg-bg-main/30 text-text-muted hover:text-text-main hover:border-primary/50 transition-all duration-200 cursor-pointer text-xs sm:text-sm"
+      >
+        <Search class="h-4 w-4" />
+        <span class="hidden sm:inline">Search...</span>
+        <kbd class="hidden sm:flex items-center gap-0.5 px-1.5 py-0.5 rounded-lg border border-border-card bg-bg-card font-mono text-[10px]">
+          <Command class="h-3 w-3" />
+          <span>K</span>
+        </kbd>
+      </button>
+
+      <!-- Theme Toggle -->
+      <button 
+        id="theme-toggle"
+        class="h-9 w-9 rounded-xl border border-border-card bg-bg-card flex items-center justify-center text-text-muted hover:text-text-main hover:border-primary/50 transition-all duration-200 cursor-pointer"
+        aria-label="Toggle theme"
+      >
+        <Sun class="h-4 w-4 hidden dark:block" />
+        <Moon class="h-4 w-4 dark:hidden" />
+      </button>
+
+      <!-- Mobile Menu Button with Animated Hamburger -->
+      <button 
+        id="mobile-menu-trigger" 
+        class="lg:hidden h-9 w-9 rounded-xl border border-border-card bg-bg-card flex flex-col items-center justify-center gap-1 cursor-pointer"
+        aria-label="Toggle menu"
+      >
+        <span class="w-5 h-0.5 bg-text-muted transition-all duration-300 transform origin-center" id="ham-line-1"></span>
+        <span class="w-5 h-0.5 bg-text-muted transition-all duration-300" id="ham-line-2"></span>
+        <span class="w-5 h-0.5 bg-text-muted transition-all duration-300 transform origin-center" id="ham-line-3"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Dropdown Menu -->
+  <div id="mobile-menu" class="hidden lg:hidden border-t border-border-card bg-bg-main/95 backdrop-blur-xl px-4 py-4 space-y-3 shadow-xl">
+    <a href="/" class="block p-2 rounded-xl hover:bg-border-card font-semibold text-xs">Home</a>
+    <a href="/tools" class="block p-2 rounded-xl hover:bg-border-card font-semibold text-xs">Tools</a>
+    <a href="/categories" class="block p-2 rounded-xl hover:bg-border-card font-semibold text-xs">Categories</a>
+    <a href="/categories/ai-tools" class="flex items-center gap-2 p-2 rounded-xl hover:bg-border-card font-semibold text-xs">
+      <Sparkles class="h-4 w-4 text-primary" />
+      AI Tools
+    </a>
+    <a href="/blog" class="block p-2 rounded-xl hover:bg-border-card font-semibold text-xs">Blog</a>
+    <a href="/pricing" class="block p-2 rounded-xl hover:bg-border-card font-semibold text-xs">Pricing</a>
+    <a href="/about" class="block p-2 rounded-xl hover:bg-border-card font-semibold text-xs">About</a>
+    <a href="/contact" class="block p-2 rounded-xl hover:bg-border-card font-semibold text-xs">Contact</a>
+    <a href="/tools?favorites=true" class="block p-2 rounded-xl hover:bg-border-card font-semibold text-xs">Favorites</a>
+    <a href="/login" class="block p-2 rounded-xl hover:bg-border-card font-semibold text-xs">Login</a>
+  </div>
+</header>
+
+<script>
+  // Theme Toggle Logic
+  const themeToggle = document.getElementById('theme-toggle');
+  
+  const getTheme = () => {
+    if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
+      return localStorage.getItem('theme');
+    }
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  };
+  
+  const setTheme = (theme: string) => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('theme', theme);
+  };
+
+  // Apply initial theme immediately
+  setTheme(getTheme() || 'light');
+
+  themeToggle?.addEventListener('click', () => {
+    const isDark = document.documentElement.classList.contains('dark');
+    setTheme(isDark ? 'light' : 'dark');
+  });
+
+  // Mobile Menu Logic
+  const mobileMenuTrigger = document.getElementById('mobile-menu-trigger');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const line1 = document.getElementById('ham-line-1');
+  const line2 = document.getElementById('ham-line-2');
+  const line3 = document.getElementById('ham-line-3');
+
+  mobileMenuTrigger?.addEventListener('click', () => {
+    const isOpen = !mobileMenu?.classList.contains('hidden');
+    if (isOpen) {
+      mobileMenu?.classList.add('hidden');
+      line1?.classList.remove('rotate-45', 'translate-y-1.5');
+      line2?.classList.remove('opacity-0');
+      line3?.classList.remove('-rotate-45', '-translate-y-1.5');
+    } else {
+      mobileMenu?.classList.remove('hidden');
+      line1?.classList.add('rotate-45', 'translate-y-1.5');
+      line2?.classList.add('opacity-0');
+      line3?.classList.add('-rotate-45', '-translate-y-1.5');
+    }
+  });
+
+  // Active navigation dots and scroll transitions
+  document.addEventListener('DOMContentLoaded', () => {
+    const path = window.location.pathname;
+    
+    document.querySelectorAll('nav a').forEach((a: any) => {
+      const href = a.getAttribute('href');
+      if (href && (path === href || (href !== '/' && path.startsWith(href)))) {
+        a.classList.add('text-primary');
+        a.classList.remove('text-text-muted');
+        const dot = document.createElement('span');
+        dot.className = 'absolute bottom-[-14px] left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary';
+        a.style.position = 'relative';
+        a.appendChild(dot);
+      }
+    });
+
+    const header = document.querySelector('header');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 20) {
+        header?.classList.add('bg-bg-main/80', 'shadow-sm');
+        header?.classList.remove('bg-bg-main/40');
+      } else {
+        header?.classList.remove('bg-bg-main/80', 'shadow-sm');
+        header?.classList.add('bg-bg-main/40');
+      }
+    });
+
+    // GSAP Dropdown transition & Logo spin
+    // @ts-ignore
+    if (typeof gsap !== 'undefined') {
+      const dropTrigger = document.querySelector('.group\\/nav');
+      const dropdown = document.getElementById('category-dropdown');
+      
+      if (dropTrigger && dropdown) {
+        dropTrigger.addEventListener('mouseenter', () => {
+          dropdown.style.display = 'block';
+          // @ts-ignore
+          gsap.fromTo(dropdown, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3, ease: 'power3.out' });
+        });
+        dropTrigger.addEventListener('mouseleave', () => {
+          // @ts-ignore
+          gsap.to(dropdown, { opacity: 0, y: 10, duration: 0.2, ease: 'power3.out', onComplete: () => {
+            dropdown.style.display = 'none';
+          }});
+        });
+      }
+
+      const logo = document.getElementById('logo-icon-container');
+      logo?.addEventListener('mouseenter', () => {
+        // @ts-ignore
+        gsap.to(logo, { rotation: 90, scale: 1.08, duration: 0.5, ease: 'power3.out' });
+      });
+      logo?.addEventListener('mouseleave', () => {
+        // @ts-ignore
+        gsap.to(logo, { rotation: 0, scale: 1, duration: 0.5, ease: 'power3.out' });
+      });
+    }
+  });
+</script>

@@ -1,0 +1,269 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolCard from '../../components/ToolCard.astro';
+import { allTools, CATEGORIES } from '../../data/tools';
+---
+
+<Layout 
+  title="All Developer Utilities - Toolsbawa"
+  description="Explore our complete collection of 100+ free online developer utilities and AI tools. Real-time search, filters, and local execution."
+>
+  <div class="py-6 border-b border-border-card mb-8">
+    <h1 class="text-3xl font-extrabold text-text-main">All Utilities & Tools</h1>
+    <p class="text-xs sm:text-sm text-text-muted mt-2">Browse the complete library of offline-first, client-side tools.</p>
+  </div>
+
+  <!-- Search & Filter Controls Panel -->
+  <div class="glass-panel p-6 rounded-3xl mb-8 flex flex-col gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <!-- Search Input -->
+      <div class="md:col-span-2 relative">
+        <input 
+          type="text" 
+          id="tools-search-input" 
+          placeholder="Search tools by name, description or keywords..." 
+          class="w-full px-4 py-2.5 pl-10 text-xs rounded-xl border border-border-card bg-bg-main/30 text-text-main focus:outline-none focus:border-primary/50"
+        />
+        <svg class="h-4 w-4 text-text-muted absolute left-3.5 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+
+      <!-- Category Filter -->
+      <div>
+        <select 
+          id="tools-category-filter" 
+          class="w-full px-3 py-2.5 text-xs rounded-xl border border-border-card bg-bg-card text-text-main focus:outline-none focus:border-primary/50"
+        >
+          <option value="all">All Categories</option>
+          {CATEGORIES.map(cat => (
+            <option value={cat.name}>{cat.name}</option>
+          ))}
+        </select>
+      </div>
+
+      <!-- Sorting -->
+      <div>
+        <select 
+          id="tools-sort-select" 
+          class="w-full px-3 py-2.5 text-xs rounded-xl border border-border-card bg-bg-card text-text-main focus:outline-none focus:border-primary/50"
+        >
+          <option value="name-asc">Name (A-Z)</option>
+          <option value="name-desc">Name (Z-A)</option>
+          <option value="category">Category</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Toggle Favorites Filter -->
+    <div class="flex items-center justify-between border-t border-border-card/50 pt-3">
+      <div class="flex items-center gap-2">
+        <input 
+          type="checkbox" 
+          id="tools-favs-only" 
+          class="h-4 w-4 rounded border-border-card text-primary focus:ring-primary accent-primary cursor-pointer"
+        />
+        <label for="tools-favs-only" class="text-xs font-semibold text-text-main cursor-pointer">Show Favorites Only</label>
+      </div>
+      <div id="results-count" class="text-xs text-text-muted font-medium">
+        Showing all tools
+      </div>
+    </div>
+  </div>
+
+  <!-- Tools Grid List -->
+  <div id="tools-listing-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" data-items={JSON.stringify(allTools)}>
+    {allTools.map(t => (
+      <ToolCard 
+        id={t.id}
+        name={t.name}
+        description={t.description}
+        category={t.category}
+        icon={t.icon}
+      />
+    ))}
+  </div>
+
+  <!-- Pagination Controls -->
+  <div id="pagination-controls" class="flex justify-center items-center gap-2.5 mt-10 border-t border-border-card/50 pt-8">
+    <button id="prev-page-btn" class="tool-btn tool-btn-secondary px-4 py-2 text-xs font-bold rounded-xl cursor-pointer disabled:opacity-50">
+      ← Previous
+    </button>
+    <span id="page-indicator" class="text-xs text-text-muted font-semibold px-4">
+      Page 1 of 1
+    </span>
+    <button id="next-page-btn" class="tool-btn tool-btn-secondary px-4 py-2 text-xs font-bold rounded-xl cursor-pointer disabled:opacity-50">
+      Next →
+    </button>
+  </div>
+</Layout>
+
+<script>
+  interface ToolItem {
+    id: string;
+    name: string;
+    description: string;
+    category: string;
+    icon: string;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('tools-search-input') as HTMLInputElement;
+    const categoryFilter = document.getElementById('tools-category-filter') as HTMLSelectElement;
+    const sortSelect = document.getElementById('tools-sort-select') as HTMLSelectElement;
+    const favsOnlyCheckbox = document.getElementById('tools-favs-only') as HTMLInputElement;
+    const resultsCount = document.getElementById('results-count');
+    const listingGrid = document.getElementById('tools-listing-grid');
+    
+    const prevBtn = document.getElementById('prev-page-btn');
+    const nextBtn = document.getElementById('next-page-btn');
+    const pageIndicator = document.getElementById('page-indicator');
+
+    let allItems: ToolItem[] = [];
+    try {
+      allItems = JSON.parse(listingGrid?.dataset.items || '[]');
+    } catch(e) {}
+
+    let filteredItems: ToolItem[] = [...allItems];
+    let currentPage = 1;
+    const itemsPerPage = 12;
+
+    const filterAndSort = () => {
+      const q = searchInput.value.toLowerCase().trim();
+      const cat = categoryFilter.value;
+      const sortBy = sortSelect.value;
+      const favsOnly = favsOnlyCheckbox.checked;
+
+      // 1. Filter
+      filteredItems = allItems.filter(item => {
+        const matchesQuery = item.name.toLowerCase().includes(q) || 
+                             item.description.toLowerCase().includes(q) ||
+                             item.category.toLowerCase().includes(q);
+        
+        const matchesCategory = cat === 'all' || item.category === cat;
+        
+        let matchesFav = true;
+        if (favsOnly) {
+          const favs = JSON.parse(localStorage.getItem('toolverse_favs') || '[]');
+          matchesFav = favs.includes(item.id);
+        }
+
+        return matchesQuery && matchesCategory && matchesFav;
+      });
+
+      // 2. Sort
+      if (sortBy === 'name-asc') {
+        filteredItems.sort((a, b) => a.name.localeCompare(b.name));
+      } else if (sortBy === 'name-desc') {
+        filteredItems.sort((a, b) => b.name.localeCompare(a.name));
+      } else if (sortBy === 'category') {
+        filteredItems.sort((a, b) => a.category.localeCompare(b.category));
+      }
+
+      currentPage = 1;
+      renderList();
+    };
+
+    const renderList = () => {
+      if (!listingGrid) return;
+      
+      const totalPages = Math.ceil(filteredItems.length / itemsPerPage) || 1;
+      if (currentPage > totalPages) currentPage = totalPages;
+
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const itemsToRender = filteredItems.slice(startIndex, endIndex);
+
+      // Render cards
+      listingGrid.innerHTML = '';
+      if (itemsToRender.length === 0) {
+        listingGrid.innerHTML = `
+          <div class="col-span-full py-16 text-center text-xs text-text-muted">
+            No tools found matching your current filter configuration.
+          </div>
+        `;
+      } else {
+        itemsToRender.forEach(t => {
+          // Re-create the ToolCard HTML
+          const favs = JSON.parse(localStorage.getItem('toolverse_favs') || '[]');
+          const isFav = favs.includes(t.id);
+          const cardHtml = `
+            <div class="glass-card p-5 rounded-2xl flex flex-col justify-between h-[230px] relative group tilt-card select-none" data-tool-id="${t.id}">
+              <div class="h-full flex flex-col justify-between">
+                <div>
+                  <div class="flex justify-between items-start mb-3">
+                    <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-primary/10 to-accent/10 flex items-center justify-center border border-border-card text-primary group-hover:scale-110 transition-transform duration-300">
+                      <span class="capitalize font-mono text-sm">${t.name.charAt(0)}</span>
+                    </div>
+                    <button 
+                      class="fav-btn p-1.5 rounded-lg border border-border-card bg-bg-card/50 text-text-muted hover:text-amber-500 hover:border-amber-500/30 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer relative z-20"
+                      aria-label="Add to favorites"
+                      data-id="${t.id}"
+                    >
+                      <svg class="h-3.5 w-3.5 ${isFav ? 'fill-amber-500 text-amber-500' : 'fill-transparent'}" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                    </button>
+                  </div>
+                  <span class="text-[9px] uppercase tracking-wider font-semibold text-primary">${t.category}</span>
+                  <h3 class="text-sm font-bold text-text-main mt-1 group-hover:text-primary transition-colors duration-200">
+                    <a href="/tools/${t.id}" class="after:absolute after:inset-0 after:z-10">${t.name}</a>
+                  </h3>
+                  <p class="text-xs text-text-muted line-clamp-2 mt-1 leading-relaxed">${t.description}</p>
+                </div>
+                <div class="flex justify-between items-center mt-2 border-t border-border-card/50 pt-2 text-[10px] text-text-muted relative z-20">
+                  <span>Local Execution</span>
+                  <div class="h-5 w-5 rounded-md bg-primary/10 flex items-center justify-center text-primary transform translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300">
+                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+          listingGrid.innerHTML += cardHtml;
+        });
+      }
+
+      // Update indicators
+      if (resultsCount) {
+        resultsCount.textContent = `Showing ${filteredItems.length} of ${allItems.length} utilities`;
+      }
+      if (pageIndicator) {
+        pageIndicator.textContent = `Page ${currentPage} of ${totalPages}`;
+      }
+      if (prevBtn) {
+        (prevBtn as HTMLButtonElement).disabled = currentPage === 1;
+      }
+      if (nextBtn) {
+        (nextBtn as HTMLButtonElement).disabled = currentPage === totalPages;
+      }
+    };
+
+    // Pagination Listeners
+    prevBtn?.addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderList();
+      }
+    });
+
+    nextBtn?.addEventListener('click', () => {
+      const totalPages = Math.ceil(filteredItems.length / itemsPerPage) || 1;
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderList();
+      }
+    });
+
+    // Control Listeners
+    searchInput?.addEventListener('input', filterAndSort);
+    categoryFilter?.addEventListener('change', filterAndSort);
+    sortSelect?.addEventListener('change', filterAndSort);
+    favsOnlyCheckbox?.addEventListener('change', filterAndSort);
+
+    // Initial load
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('favorites') === 'true' && favsOnlyCheckbox) {
+      favsOnlyCheckbox.checked = true;
+    }
+    filterAndSort();
+  });
+</script>

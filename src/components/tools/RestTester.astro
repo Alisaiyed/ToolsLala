@@ -1,0 +1,224 @@
+---
+import { Play, Plus, Trash, Clock, Info } from '@lucide/astro';
+---
+
+<div class="space-y-6">
+  <!-- Request Editor panel -->
+  <div class="glass-card p-5 rounded-2xl space-y-4">
+    <div class="flex items-center justify-between border-b border-border-card pb-2">
+      <h3 class="text-sm font-bold uppercase tracking-wider text-text-main">REST Request Builder</h3>
+      <button id="api-send-btn" class="tool-btn tool-btn-primary py-1.5 px-4 text-xs flex items-center gap-1.5">
+        <Play class="h-3.5 w-3.5" /> Send Request
+      </button>
+    </div>
+
+    <!-- Method + URL Input -->
+    <div class="flex flex-col sm:flex-row gap-3">
+      <select id="api-method" class="sm:w-32 p-3 rounded-xl border border-border-card bg-bg-main/30 text-xs font-bold text-primary focus:outline-none">
+        <option value="GET">GET</option>
+        <option value="POST">POST</option>
+        <option value="PUT">PUT</option>
+        <option value="DELETE">DELETE</option>
+        <option value="PATCH">PATCH</option>
+      </select>
+      <input 
+        type="text" 
+        id="api-url" 
+        placeholder="https://api.github.com/users/octocat" 
+        value="https://api.github.com/users/octocat"
+        class="flex-grow p-3 rounded-xl border border-border-card bg-bg-main/30 text-xs text-text-main focus:outline-none" 
+      />
+    </div>
+
+    <!-- Request parameters Tabs -->
+    <div class="space-y-3">
+      <!-- Tabs selectors -->
+      <div class="flex gap-4 border-b border-border-card">
+        <button id="tab-headers-btn" class="text-xs font-semibold py-1.5 border-b-2 border-primary text-text-main focus:outline-none cursor-pointer">Headers</button>
+        <button id="tab-body-btn" class="text-xs font-semibold py-1.5 border-b-2 border-transparent text-text-muted hover:text-text-main focus:outline-none cursor-pointer">Request Body</button>
+      </div>
+
+      <!-- Headers subpanel -->
+      <div id="panel-headers" class="space-y-3">
+        <div id="headers-rows" class="space-y-2">
+          <div class="flex gap-2 header-row">
+            <input type="text" placeholder="Content-Type" class="w-1/2 p-2.5 rounded-lg border border-border-card bg-bg-main/20 text-xs text-text-main focus:outline-none" value="application/json" />
+            <input type="text" placeholder="application/json" class="w-1/2 p-2.5 rounded-lg border border-border-card bg-bg-main/20 text-xs text-text-main focus:outline-none" value="application/json" />
+            <button class="remove-header-btn p-2 text-text-muted hover:text-rose-400"><Trash class="h-3.5 w-3.5" /></button>
+          </div>
+        </div>
+        <button id="add-header-btn" class="tool-btn tool-btn-secondary py-1 px-3 text-xs flex items-center gap-1">
+          <Plus class="h-3 w-3" /> Add Header
+        </button>
+      </div>
+
+      <!-- Body subpanel -->
+      <div id="panel-body" class="hidden">
+        <label class="tool-label text-xs">JSON Payloads (POST/PUT)</label>
+        <textarea 
+          id="api-body-payload" 
+          rows="5" 
+          placeholder="{\n  &quot;key&quot;: &quot;value&quot;\n}"
+          class="w-full p-3 rounded-xl border border-border-card bg-bg-main/30 text-xs font-mono text-text-main focus:outline-none"
+        ></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results panel -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Diagnostics / Info -->
+    <div class="glass-card p-5 rounded-2xl space-y-3 h-fit">
+      <h4 class="text-xs font-bold uppercase tracking-wider text-text-main border-b border-border-card pb-1.5">Response Diagnostics</h4>
+      <div class="space-y-2 text-xs text-text-muted">
+        <div class="flex justify-between">
+          <span>Status Code:</span>
+          <span id="res-status" class="font-bold text-text-main">-</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Latency:</span>
+          <span id="res-latency" class="font-bold text-text-main">-</span>
+        </div>
+      </div>
+
+      <!-- CORS warning -->
+      <div class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-[10px] text-amber-400 space-y-1.5 mt-4">
+        <div class="flex items-center gap-1.5 font-bold"><Info class="h-3.5 w-3.5" /> CORS Sandbox Alert</div>
+        <p class="leading-relaxed">Direct API requests from browsers may fail due to CORS. Perfect for testing local APIs (e.g. <code>localhost:3000</code>) or public endpoints supporting CORS (e.g. GitHub API).</p>
+      </div>
+    </div>
+
+    <!-- Response Body view -->
+    <div class="md:col-span-2 glass-card p-5 rounded-2xl flex flex-col">
+      <h4 class="text-xs font-bold uppercase tracking-wider text-text-main border-b border-border-card pb-1.5 mb-3">Response Payload</h4>
+      <textarea 
+        id="api-res-body" 
+        readonly 
+        rows="10" 
+        placeholder="Response content will render here..."
+        class="w-full p-3 rounded-xl border border-border-card bg-bg-main/30 text-xs font-mono text-text-main focus:outline-none"
+      ></textarea>
+    </div>
+  </div>
+</div>
+
+<script>
+  const tabHeaders = document.getElementById('tab-headers-btn');
+  const tabBody = document.getElementById('tab-body-btn');
+  const panelHeaders = document.getElementById('panel-headers');
+  const panelBody = document.getElementById('panel-body');
+  
+  const headersRows = document.getElementById('headers-rows');
+  const addHeaderBtn = document.getElementById('add-header-btn');
+  const sendBtn = document.getElementById('api-send-btn');
+  
+  const methodSelect = document.getElementById('api-method') as HTMLSelectElement;
+  const urlInput = document.getElementById('api-url') as HTMLInputElement;
+  const bodyPayload = document.getElementById('api-body-payload') as HTMLTextAreaElement;
+
+  const resStatus = document.getElementById('res-status');
+  const resLatency = document.getElementById('res-latency');
+  const resBody = document.getElementById('api-res-body') as HTMLTextAreaElement;
+
+  // Tabs toggling
+  tabHeaders?.addEventListener('click', () => {
+    tabHeaders.className = 'text-xs font-semibold py-1.5 border-b-2 border-primary text-text-main focus:outline-none cursor-pointer';
+    tabBody?.classList.replace('border-primary', 'border-transparent');
+    tabBody?.classList.replace('text-text-main', 'text-text-muted');
+    panelHeaders?.classList.remove('hidden');
+    panelBody?.classList.add('hidden');
+  });
+
+  tabBody?.addEventListener('click', () => {
+    tabBody.className = 'text-xs font-semibold py-1.5 border-b-2 border-primary text-text-main focus:outline-none cursor-pointer';
+    tabHeaders?.classList.replace('border-primary', 'border-transparent');
+    tabHeaders?.classList.replace('text-text-main', 'text-text-muted');
+    panelBody?.classList.remove('hidden');
+    panelHeaders?.classList.add('hidden');
+  });
+
+  // Add Header Row
+  addHeaderBtn?.addEventListener('click', () => {
+    const row = document.createElement('div');
+    row.className = 'flex gap-2 header-row';
+    row.innerHTML = `
+      <input type="text" placeholder="Header Key" class="w-1/2 p-2.5 rounded-lg border border-border-card bg-bg-main/20 text-xs text-text-main focus:outline-none" />
+      <input type="text" placeholder="Value" class="w-1/2 p-2.5 rounded-lg border border-border-card bg-bg-main/20 text-xs text-text-main focus:outline-none" />
+      <button class="remove-header-btn p-2 text-text-muted hover:text-rose-400"><svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+    `;
+    headersRows?.appendChild(row);
+  });
+
+  // Remove Header Row listener
+  headersRows?.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    const btn = target.closest('.remove-header-btn');
+    if (btn) btn.closest('.header-row')?.remove();
+  });
+
+  // Send request execution
+  sendBtn?.addEventListener('click', async () => {
+    const method = methodSelect.value;
+    const url = urlInput.value.trim();
+    if (!url) {
+      window.showToast?.('Please enter a valid URL', 'error');
+      return;
+    }
+
+    sendBtn.setAttribute('disabled', 'true');
+    sendBtn.textContent = 'Sending...';
+
+    // Parse headers key values
+    const headers: any = {};
+    document.querySelectorAll('.header-row').forEach(row => {
+      const inputs = row.querySelectorAll('input');
+      const key = inputs[0]?.value.trim();
+      const val = inputs[1]?.value.trim();
+      if (key) headers[key] = val;
+    });
+
+    const body = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method) ? bodyPayload.value : undefined;
+
+    const startTime = performance.now();
+    try {
+      const response = await fetch(url, {
+        method,
+        headers,
+        body
+      });
+      const endTime = performance.now();
+      
+      const duration = Math.round(endTime - startTime);
+      if (resLatency) resLatency.textContent = `${duration} ms`;
+      if (resStatus) {
+        resStatus.textContent = `${response.status} ${response.statusText}`;
+        resStatus.className = response.ok ? 'font-bold text-emerald-400' : 'font-bold text-rose-400';
+      }
+
+      const text = await response.text();
+      try {
+        const json = JSON.parse(text);
+        if (resBody) resBody.value = JSON.stringify(json, null, 2);
+      } catch (err) {
+        if (resBody) resBody.value = text;
+      }
+      window.showToast?.('Request completed', 'success');
+
+    } catch (err: any) {
+      const endTime = performance.now();
+      const duration = Math.round(endTime - startTime);
+      if (resLatency) resLatency.textContent = `${duration} ms`;
+      if (resStatus) {
+        resStatus.textContent = 'Failed';
+        resStatus.className = 'font-bold text-rose-400';
+      }
+      if (resBody) {
+        resBody.value = `Network Error / CORS Issue:\n- Request could not be sent to: ${url}\n- Reason: ${err.message}\n\nPlease check your URL, verify internet connection, or make sure the server replies with correct Access-Control-Allow-Origin headers.`;
+      }
+      window.showToast?.('Request failed due to CORS or Network error', 'error');
+    } finally {
+      sendBtn.removeAttribute('disabled');
+      sendBtn.innerHTML = `<svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/></svg> Send Request`;
+    }
+  });
+</script>

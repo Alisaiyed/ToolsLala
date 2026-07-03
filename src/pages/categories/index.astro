@@ -1,0 +1,52 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import DynamicIcon from '../../components/DynamicIcon.astro';
+import { CATEGORIES, allTools } from '../../data/tools';
+
+const categoriesWithCount = CATEGORIES.map(cat => {
+  const count = allTools.filter(t => t.category === cat.name).length;
+  return { ...cat, count };
+});
+---
+
+<Layout 
+  title="All Tool Categories - Toolsbawa"
+  description="Browse our massive collection of developer utility tools. Grouped into categories for JSON, AI, Conversion, Security, Colors, PDF and Network tools."
+>
+  <div class="py-6 border-b border-border-card mb-10">
+    <h1 class="text-3xl font-extrabold text-text-main">Tool Categories</h1>
+    <p class="text-xs sm:text-sm text-text-muted mt-2">Explore 100+ utilities organized into dedicated functional groupings.</p>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {categoriesWithCount.map(cat => (
+      <div 
+        class="glass-card p-6 rounded-2xl flex flex-col justify-between hover:border-primary/50 transition-all duration-300 relative group"
+      >
+        <div class="flex items-start gap-4">
+          <div class="h-12 w-12 rounded-xl bg-gradient-to-tr from-primary/10 to-accent/10 flex items-center justify-center border border-border-card text-primary group-hover:scale-105 transition-transform duration-300 shrink-0">
+            <DynamicIcon name={cat.icon} class="h-6 w-6" />
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-base font-bold text-text-main group-hover:text-primary transition-colors duration-200">{cat.name}</h2>
+              <span class="px-1.5 py-0.5 rounded-md bg-border-card text-[9px] font-bold text-text-muted">
+                {cat.count} tools
+              </span>
+            </div>
+            <p class="text-xs text-text-muted mt-2 leading-relaxed">{cat.desc}</p>
+          </div>
+        </div>
+        
+        <div class="mt-6 border-t border-border-card/50 pt-4 flex justify-end">
+          <a 
+            href={`/categories/${cat.id}`}
+            class="tool-btn tool-btn-secondary py-1.5 px-4 text-xs font-bold rounded-xl flex items-center gap-1 cursor-pointer"
+          >
+            Open Category →
+          </a>
+        </div>
+      </div>
+    ))}
+  </div>
+</Layout>

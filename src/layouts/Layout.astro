@@ -1,0 +1,334 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import FloatingBackground from '../components/FloatingBackground.astro';
+import CommandPalette from '../components/CommandPalette.astro';
+import Toast from '../components/Toast.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  canonical?: string;
+  keywords?: string;
+}
+
+const { 
+  title, 
+  description = "100+ Free Online Developer & AI Tools in One Place - JSON formatters, calculators, regex builders, encoders and design CSS utilities.",
+  canonical = "https://toolsbawa.com",
+  keywords = "developer tools, free utilities, json formatter, code playgrounds, converters, hash generators, password generators, AI coding tools"
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    
+    <!-- Primary Meta Tags -->
+    <title>{title}</title>
+    <meta name="title" content={title} />
+    <meta name="description" content={description} />
+    <meta name="keywords" content={keywords} />
+    
+    <!-- Canonical -->
+    <link rel="canonical" href={canonical} />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content="https://toolsbawa.com/og-image.jpg" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={canonical} />
+    <meta property="twitter:title" content={title} />
+    <meta property="twitter:description" content={description} />
+    <meta property="twitter:image" content="https://toolsbawa.com/og-image.jpg" />
+
+    <!-- Load GSAP & ScrollTrigger from high-performance CDN -->
+    <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+    <!-- Theme Inline Script to avoid FOUC (Flash of Unstyled Content) -->
+    <script is:inline>
+      const getThemePreference = () => {
+        if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
+          return localStorage.getItem('theme');
+        }
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      };
+      
+      const theme = getThemePreference();
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    </script>
+  </head>
+  <body class="flex flex-col min-h-screen relative overflow-x-hidden selection:bg-primary/20 selection:text-primary">
+    <!-- Scroll Progress Indicator -->
+    <div id="scroll-progress"></div>
+
+    <!-- Custom Cursor Follower -->
+    <div id="custom-cursor"></div>
+    <div id="custom-cursor-dot"></div>
+
+    <!-- Floating Background Particles -->
+    <div id="particles-container"></div>
+
+    <!-- Glowing background patterns -->
+    <FloatingBackground />
+
+    <!-- Navigation Header -->
+    <Header />
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+      <slot />
+    </main>
+
+    <!-- Global Footer -->
+    <Footer />
+
+    <!-- Scroll to Top Button -->
+    <button id="scroll-to-top" class="tool-btn tool-btn-primary p-3 rounded-full shadow-lg" aria-label="Scroll to top">
+      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+      </svg>
+    </button>
+
+    <!-- Global Modals & Components -->
+    <CommandPalette />
+    <Toast />
+
+    <!-- Global client scripts -->
+    <script>
+      // Global click handler for favorites buttons
+      document.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+        const btn = target.closest('.fav-btn');
+        if (!btn) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const id = btn.getAttribute('data-id');
+        if (!id) return;
+        
+        let favs = JSON.parse(localStorage.getItem('toolverse_favs') || '[]');
+        const idx = favs.indexOf(id);
+        
+        if (idx > -1) {
+          favs.splice(idx, 1);
+          btn.querySelector('svg')?.classList.remove('fill-amber-500', 'text-amber-500');
+          btn.querySelector('svg')?.classList.add('fill-transparent');
+          // @ts-ignore
+          window.showToast?.('Removed from favorites', 'success');
+        } else {
+          favs.push(id);
+          btn.querySelector('svg')?.classList.add('fill-amber-500', 'text-amber-500');
+          // @ts-ignore
+          window.showToast?.('Added to favorites', 'success');
+        }
+        
+        localStorage.setItem('toolverse_favs', JSON.stringify(favs));
+        
+        // Dispatch custom event to let other components know
+        window.dispatchEvent(new CustomEvent('favs-updated'));
+      });
+
+      // Synchronize favorite icons on mount
+      const syncFavs = () => {
+        const favs = JSON.parse(localStorage.getItem('toolverse_favs') || '[]');
+        document.querySelectorAll('.fav-btn').forEach(btn => {
+          const id = btn.getAttribute('data-id');
+          if (id && favs.includes(id)) {
+            btn.querySelector('svg')?.classList.add('fill-amber-500', 'text-amber-500');
+          }
+        });
+      };
+      
+      syncFavs();
+      window.addEventListener('favs-updated', syncFavs);
+
+      // GSAP ScrollTrigger Animations & Interactions
+      // Ensure GSAP works properly on DOM mount
+      document.addEventListener('DOMContentLoaded', () => {
+        // @ts-ignore
+        if (typeof gsap === 'undefined') return;
+
+        // Register ScrollTrigger
+        // @ts-ignore
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Custom Cursor Follower
+        const cursor = document.getElementById('custom-cursor');
+        const cursorDot = document.getElementById('custom-cursor-dot');
+        
+        if (cursor && cursorDot && window.matchMedia('(pointer: fine)').matches) {
+          cursor.style.opacity = '1';
+          cursorDot.style.opacity = '1';
+          
+          document.addEventListener('mousemove', (e) => {
+            // @ts-ignore
+            gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.15, ease: "power2.out" });
+            // @ts-ignore
+            gsap.to(cursorDot, { x: e.clientX, y: e.clientY, duration: 0.02 });
+          });
+          
+          document.querySelectorAll('a, button, input, select, textarea, .interactive-item').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+              cursor.style.width = '28px';
+              cursor.style.height = '28px';
+              cursor.style.borderColor = 'var(--accent)';
+              cursor.style.backgroundColor = 'rgba(37, 99, 235, 0.04)';
+            });
+            el.addEventListener('mouseleave', () => {
+              cursor.style.width = '18px';
+              cursor.style.height = '18px';
+              cursor.style.borderColor = 'var(--primary)';
+              cursor.style.backgroundColor = 'transparent';
+            });
+          });
+        }
+
+        // Magnetic Buttons
+        document.querySelectorAll('.magnetic-btn').forEach(btn => {
+          btn.addEventListener('mousemove', (e) => {
+            const rect = btn.getBoundingClientRect();
+            // @ts-ignore
+            const x = e.clientX - rect.left - rect.width / 2;
+            // @ts-ignore
+            const y = e.clientY - rect.top - rect.height / 2;
+            // @ts-ignore
+            gsap.to(btn, { x: x * 0.35, y: y * 0.35, duration: 0.3, ease: "power3.out" });
+          });
+          btn.addEventListener('mouseleave', () => {
+            // @ts-ignore
+            gsap.to(btn, { x: 0, y: 0, duration: 0.5, ease: "elastic.out(1, 0.3)" });
+          });
+        });
+
+        // Floating Background Particles (Extremely minimal)
+        const pContainer = document.getElementById('particles-container');
+        if (pContainer) {
+          const count = 18;
+          for (let i = 0; i < count; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            const size = Math.random() * 3 + 2;
+            p.style.width = p.style.height = `${size}px`;
+            p.style.left = `${Math.random() * 100}%`;
+            p.style.top = `${Math.random() * 100}%`;
+            pContainer.appendChild(p);
+            
+            // @ts-ignore
+            gsap.to(p, {
+              y: `random(-80, 80)`,
+              x: `random(-80, 80)`,
+              opacity: `random(0.04, 0.2)`,
+              duration: Math.random() * 20 + 20,
+              repeat: -1,
+              yoyo: true,
+              ease: "sine.inOut"
+            });
+          }
+        }
+
+        // Card Tilt on Mouse Movement
+        document.querySelectorAll('.tilt-card').forEach(card => {
+          card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            // @ts-ignore
+            const x = e.clientX - rect.left;
+            // @ts-ignore
+            const y = e.clientY - rect.top;
+            // @ts-ignore
+            const rotateX = ((y / rect.height) - 0.5) * 8;
+            // @ts-ignore
+            const rotateY = ((x / rect.width) - 0.5) * -8;
+            // @ts-ignore
+            gsap.to(card, {
+              rotateX: rotateX,
+              rotateY: rotateY,
+              transformPerspective: 800,
+              ease: "power3.out",
+              duration: 0.3
+            });
+          });
+          card.addEventListener('mouseleave', () => {
+            // @ts-ignore
+            gsap.to(card, { rotateX: 0, rotateY: 0, duration: 0.5, ease: "power3.out" });
+          });
+        });
+
+        // Scroll Progress & Scroll To Top triggers
+        const scrollProgress = document.getElementById('scroll-progress');
+        const scrollBtn = document.getElementById('scroll-to-top');
+
+        window.addEventListener('scroll', () => {
+          const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+          const progress = (window.pageYOffset / totalHeight) * 100;
+          if (scrollProgress) scrollProgress.style.width = `${progress}%`;
+
+          if (window.pageYOffset > 400) {
+            scrollBtn?.classList.add('visible');
+          } else {
+            scrollBtn?.classList.remove('visible');
+          }
+        });
+
+        scrollBtn?.addEventListener('click', () => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Button Click Ripple Effect
+        document.addEventListener('click', (e) => {
+          const btn = (e.target as HTMLElement).closest('.tool-btn, button');
+          if (!btn) return;
+          
+          const rect = btn.getBoundingClientRect();
+          const ripple = document.createElement('span');
+          ripple.className = 'ripple';
+          const size = Math.max(rect.width, rect.height);
+          ripple.style.width = ripple.style.height = `${size}px`;
+          // @ts-ignore
+          ripple.style.left = `${e.clientX - rect.left - size / 2}px`;
+          // @ts-ignore
+          ripple.style.top = `${e.clientY - rect.top - size / 2}px`;
+          
+          btn.appendChild(ripple);
+          setTimeout(() => ripple.remove(), 600);
+        });
+
+        // Scroll reveals for sections & elements
+        // @ts-ignore
+        gsap.utils.toArray('.reveal-up').forEach((elem: any) => {
+          // @ts-ignore
+          gsap.fromTo(elem, 
+            { y: 30, opacity: 0 },
+            { 
+              y: 0, 
+              opacity: 1, 
+              duration: 0.8, 
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: elem,
+                start: "top 85%",
+                toggleActions: "play none none none"
+              }
+            }
+          );
+        });
+      });
+    </script>
+  </body>
+</html>
